@@ -1683,20 +1683,28 @@ audio.addEventListener('timeupdate', () => {
 });
 // Pausa que no hizo la app: el móvil la manda al desconectar el coche (Android Auto / Bluetooth) o los
 // auriculares, o por una llamada. Se respeta SIEMPRE, también con la pantalla apagada.
+// Si fue algo pasajero (un aviso, el navegador del coche hablando), el móvil la reanuda solo y la app sigue.
 audio.addEventListener('pause', () => {
   if (!state.playing || audio.ended || state.loading || audio.currentTime <= 0 || Date.now() - ownPauseAt < 1500) return;
-  systemStop('En pausa');
+  systemStop('En pausa (la pausó el móvil)', false);
 });
-function systemStop(msg) { state.playing = false; setLoading(false); try { pauseAudio(); } catch (e) {} setPlayIcon(); setStatus(msg); saveMeta(true); bgSound.stop(); }
-// Al apagar el coche desaparece una salida de sonido: entonces se para (por si el móvil no lo hace solo)
+function systemStop(msg, alsoPause = true) {
+  piper.logError('parada: ' + msg);
+  state.playing = false; setLoading(false);
+  if (alsoPause) { try { pauseAudio(); } catch (e) {} } // si ya la pausó el móvil, no se toca: así puede reanudarla él solo
+  setPlayIcon(); setStatus(msg); saveMeta(true); bgSound.stop();
+}
+// Al apagar el coche desaparece una salida de sonido: entonces se para (por si el móvil no lo hace solo).
+// Se comprueba dos veces para no parar por cambios pasajeros.
 let audioOuts = -1;
 async function countOutputs() { try { return (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'audiooutput').length; } catch (e) { return -1; } }
 countOutputs().then(n => { audioOuts = n; });
 navigator.mediaDevices?.addEventListener?.('devicechange', async () => {
-  const n = await countOutputs(), before = audioOuts; audioOuts = n;
-  const lost = n >= 0 && before >= 0 && n < before;
-  const carOpen = !$('carView').classList.contains('hidden');
-  if (state.playing && (lost || carOpen)) { systemStop('En pausa: se desconectó el coche o los auriculares'); if (carOpen) $('carExit').click(); }
+  const before = audioOuts, n = await countOutputs();
+  if (n < 0 || before < 0 || n >= before) { audioOuts = n; return; }
+  await sleep(1200);
+  const n2 = await countOutputs(); audioOuts = n2;
+  if (n2 < before && state.playing) { systemStop('En pausa: se desconectó el coche o los auriculares'); if (!$('carView').classList.contains('hidden')) $('carExit').click(); }
 });
 audio.addEventListener('play', () => { if (!state.playing) { state.playing = true; setPlayIcon(); setStatus(voiceLabel()); } });
 
