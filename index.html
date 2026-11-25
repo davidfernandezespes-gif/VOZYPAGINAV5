@@ -1797,7 +1797,8 @@ let iconUrl = '';
 function makeIcon() {
   try {
     const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
-    g.fillStyle = '#7b5a3c'; g.fillRect(0, 0, 512, 512);
+    ['#E40303', '#FF8C00', '#FFED00', '#008026', '#004DFF', '#750787'].forEach((col, i) => { g.fillStyle = col; g.fillRect(0, Math.round(i * 512 / 6), 512, Math.ceil(512 / 6) + 1); }); // bandera arcoíris
+    g.shadowColor = '#0006'; g.shadowOffsetX = g.shadowOffsetY = 6;
     g.strokeStyle = '#fff'; g.lineWidth = 28; g.lineJoin = g.lineCap = 'round';
     g.beginPath(); g.moveTo(140, 150); g.quadraticCurveTo(140, 110, 180, 110); g.lineTo(380, 110); g.lineTo(380, 380); g.lineTo(180, 380); g.quadraticCurveTo(140, 380, 140, 420); g.closePath(); g.stroke();
     g.beginPath(); g.moveTo(200, 180); g.lineTo(320, 180); g.moveTo(200, 240); g.lineTo(320, 240); g.stroke();

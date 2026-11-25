@@ -1,0 +1,18 @@
+{
+  "name": "Voz y Página",
+  "short_name": "Voz y Página",
+  "description": "Escucha tus libros EPUB en voz alta, también con la pantalla apagada.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "es",
+  "background_color": "#f3e9d2",
+  "theme_color": "#7b5a3c",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
