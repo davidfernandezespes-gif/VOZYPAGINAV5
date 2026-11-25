@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#f3e9d2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1e1913" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Voz y Página">
+<title>Voz y Página</title>
+<link rel="apple-touch-icon" id="appleIcon">
+<style>
+:root{--ink:#4b3b2a;--muted:#8a7660;--paper:#f3e9d2;--card:#f9f1df;--line:#e2d3b5;--soft:#ebdfc4;--green:#7b5a3c;--green2:#634830;--lime:#e8d9b8;--hl:#e9d3a4;--orange:#b26a37;--danger:#a3452f;--shadow:0 10px 30px #4b3b2a14;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);--reader-size:19px}
+@media (prefers-color-scheme:dark){:root{--ink:#e4d5bb;--muted:#a8967b;--paper:#1e1913;--card:#28211a;--line:#3b3125;--soft:#332a20;--green:#c9a57a;--green2:#dbbb92;--lime:#3a2f23;--hl:#4b3b28;--orange:#e0a070;--danger:#e0896f;--shadow:0 10px 30px #0007}}
+html[data-theme="sepia"]{--ink:#4b3b2a;--muted:#8a7660;--paper:#f3e9d2;--card:#f9f1df;--line:#e2d3b5;--soft:#ebdfc4;--green:#7b5a3c;--green2:#634830;--lime:#e8d9b8;--hl:#e9d3a4;--orange:#b26a37;--danger:#a3452f}
+html[data-theme="sepia-noche"]{--ink:#e4d5bb;--muted:#a8967b;--paper:#1e1913;--card:#28211a;--line:#3b3125;--soft:#332a20;--green:#c9a57a;--green2:#dbbb92;--lime:#3a2f23;--hl:#4b3b28;--orange:#e0a070;--danger:#e0896f}
+html[data-theme="crema"]{--ink:#1c1a16;--muted:#5a554b;--paper:#fbf5e6;--card:#fffaf0;--line:#e6dcc3;--soft:#f1e8d2;--green:#5b4a2e;--green2:#463821;--lime:#efe3c4;--hl:#ffe38a;--orange:#a8552a;--danger:#a3341f}
+html[data-theme="verde"]{--ink:#24331f;--muted:#5e6f57;--paper:#e6efdf;--card:#eef5e8;--line:#cddcc3;--soft:#dbe8d1;--green:#3f6b3a;--green2:#2f552b;--lime:#d3e5c8;--hl:#c4dfa9;--orange:#9a6a2b;--danger:#a3452f}
+html[data-theme="gris-noche"]{--ink:#c9c9c4;--muted:#8d8d87;--paper:#1b1c1d;--card:#232425;--line:#333435;--soft:#2c2d2e;--green:#a9b4bd;--green2:#c3ccd3;--lime:#2e3235;--hl:#3a4045;--orange:#d2a16e;--danger:#e0896f}
+html[data-theme="contraste"]{--ink:#ffffff;--muted:#d0d0d0;--paper:#000000;--card:#0d0d0d;--line:#5a5a5a;--soft:#1c1c1c;--green:#ffffff;--green2:#ffffff;--lime:#262626;--hl:#1f4fbf;--orange:#ffcc33;--danger:#ff7b6b}
+html[data-theme="amarillo"]{--ink:#ffe066;--muted:#e6c955;--paper:#000000;--card:#0d0d0d;--line:#6b5a1a;--soft:#1c1a0e;--green:#ffe066;--green2:#fff0a0;--lime:#262207;--hl:#5a4a00;--orange:#ffffff;--danger:#ff8f80}
+html[data-theme="contraste"] .s.on,html[data-theme="amarillo"] .s.on{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px;text-decoration-color:var(--orange)}
+html[data-theme="contraste"] .play,html[data-theme="amarillo"] .play,html[data-theme="contraste"] .fab,html[data-theme="amarillo"] .fab,html[data-theme="contraste"] .btn:not(.ghost):not(.danger),html[data-theme="amarillo"] .btn:not(.ghost):not(.danger){color:#000}
+html[data-theme="contraste"] .continue,html[data-theme="amarillo"] .continue{color:#000}
+/* ayudas de lectura */
+.text-inner{line-height:var(--reader-lh,1.7);letter-spacing:var(--reader-ls,0);font-weight:var(--reader-fw,400)}
+html[data-font="clara"] .text-inner{font-family:Verdana,"Segoe UI",Roboto,ui-sans-serif,system-ui,sans-serif}
+html[data-font="atkinson"] .text-inner{font-family:"Atkinson Hyperlegible",Verdana,ui-sans-serif,system-ui,sans-serif}
+.text-inner.focus .s{opacity:.28;transition:opacity .3s}
+.text-inner.focus .s.on{opacity:1}
+html[data-big="1"] .cbtn{width:58px;height:58px}html[data-big="1"] .cbtn svg{width:28px;height:28px}
+html[data-big="1"] .play{width:78px;height:78px}html[data-big="1"] .play svg{width:30px;height:30px}
+html[data-big="1"] .chip{font-size:15px;padding:10px 15px}html[data-big="1"] .r-top .icon svg{width:26px;height:26px}
+html[data-big="1"] .status-line,html[data-big="1"] .prog-row{font-size:14px}
+.car{position:fixed;inset:0;z-index:30;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;padding:calc(18px + var(--safe-t)) 18px calc(18px + var(--safe-b))}
+.car-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.car-top b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.car-exit{border:2px solid var(--line);border-radius:14px;padding:12px 16px;font-size:16px;font-weight:700;flex:none}
+.car-mid{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px}
+.car-ch{font-size:22px;font-weight:700;line-height:1.25;max-width:100%}
+.car-st{font-size:16px;color:var(--muted);min-height:22px}
+.car-play{width:min(52vw,230px);height:min(52vw,230px);border-radius:50%;background:var(--green);color:var(--paper);display:grid;place-items:center;box-shadow:var(--shadow)}
+.car-play svg{width:42%;height:42%}
+.car-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.car-row button{border-radius:22px;background:var(--soft);padding:26px 6px;font-size:20px;font-weight:800;color:var(--ink)}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.theme-btn{border-radius:12px;padding:12px 10px;font-size:14px;font-weight:650;text-align:left;border:2px solid transparent;line-height:1.25}
+.theme-btn small{display:block;font-weight:500;font-size:11px;opacity:.8;margin-top:3px}
+.theme-btn.on{border-color:var(--orange)}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg3 button{padding:11px 4px;border-radius:10px;background:var(--soft);font-size:13px;font-weight:650;color:var(--ink)}
+.seg3 button.on{background:var(--green);color:var(--paper)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+svg{display:block}
+.hidden{display:none!important}
+.view{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:var(--safe-t)}
+
+/* Biblioteca */
+.lib-scroll{flex:1;overflow:auto;padding:22px 18px calc(100px + var(--safe-b));max-width:720px;width:100%;margin:0 auto}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;letter-spacing:-.04em;font-size:19px}
+.mark{width:36px;height:36px;border-radius:12px;background:var(--green);display:grid;place-items:center;color:var(--paper)}
+.mark svg{width:20px}
+.lib-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.round{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.round svg{width:19px;height:19px}
+h1{font-size:34px;line-height:1.05;letter-spacing:-.05em;margin:0 0 6px}
+.lead{color:var(--muted);margin:0 0 22px;font-size:15px}
+.continue{display:flex;gap:14px;align-items:center;background:var(--green);color:#fff;border-radius:20px;padding:16px;margin-bottom:26px;width:100%;text-align:left;box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.continue{color:#1e1913}}
+.continue .cover{box-shadow:none}
+.continue small{display:block;opacity:.8;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:3px}
+.continue strong{display:block;font-size:16px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.continue span{font-size:12px;opacity:.85}
+.continue .go{margin-left:auto;width:44px;height:44px;flex:none;border-radius:50%;background:#ffffff2a;display:grid;place-items:center}
+.continue .go svg{width:18px}
+.section-h{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 12px}
+.section-h h2{font-size:17px;margin:0;letter-spacing:-.03em}
+.subtle{font-size:12px;color:var(--muted)}
+.cover{width:46px;height:62px;flex:none;border-radius:7px;color:#fff;display:grid;place-items:center;font-family:Georgia,serif;font-size:19px;box-shadow:2px 3px 8px #0002}
+.book{display:flex;align-items:center;gap:13px;padding:13px;background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;width:100%;text-align:left}
+.book-info{min-width:0;flex:1}
+.book-info strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.book-info .meta{font-size:12px;color:var(--muted);display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.minibar{height:3px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.minibar i{display:block;height:100%;background:var(--green)}
+.more{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:var(--muted);flex:none}
+.more svg{width:18px}
+.empty{border:1.5px dashed var(--line);border-radius:18px;padding:30px 20px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
+.empty strong{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + var(--safe-b));background:var(--green);color:var(--paper);border-radius:30px;padding:15px 24px;font-weight:700;font-size:15px;display:flex;gap:9px;align-items:center;box-shadow:0 8px 24px #7b5a3c50}
+.fab svg{width:19px}
+.drag-over .lib-scroll{outline:2px dashed var(--green);outline-offset:-8px}
+
+/* Lector */
+.r-top{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper)}
+.r-top .icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--ink);flex:none}
+.r-top .icon svg{width:21px;height:21px}
+.r-title{flex:1;min-width:0;text-align:center}
+.r-title strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-title span{display:block;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.text{flex:1;overflow:auto;padding:22px 22px 30px;-webkit-overflow-scrolling:touch}
+.text-inner{max-width:680px;margin:0 auto;font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-size:var(--reader-size);line-height:1.7;color:var(--ink)}
+.text-inner h2{font-family:inherit;font-size:1.25em;letter-spacing:-.01em;margin:4px 0 22px;line-height:1.3}
+.text-inner p{margin:0 0 .9em}
+.s{border-radius:4px;transition:background .25s;cursor:pointer}
+.s.on{background:var(--hl);box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.ch-end{display:flex;justify-content:center;margin:26px 0 10px}
+.ch-end button{padding:11px 18px;border-radius:12px;background:var(--soft);font-family:Inter,system-ui,sans-serif;font-size:13px;font-weight:650}
+
+/* Reproductor */
+.player{border-top:1px solid var(--line);background:var(--card);padding:10px 16px calc(12px + var(--safe-b));box-shadow:0 -8px 24px #0000000a}
+.prog-row{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:22px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(to right,var(--green) var(--p,0%),var(--line) var(--p,0%))}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--line)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--green)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--green);margin-top:-6px;border:2px solid var(--card)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--green);border:2px solid var(--card)}
+.status-line{text-align:center;font-size:11.5px;color:var(--muted);min-height:16px;margin:2px 0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status-line.err{color:var(--danger)}
+.controls{display:flex;align-items:center;justify-content:space-between;max-width:420px;margin:0 auto}
+.cbtn{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--ink)}
+.cbtn svg{width:22px;height:22px}
+.cbtn:active{background:var(--soft)}
+.play{width:62px;height:62px;border-radius:50%;background:var(--green);color:var(--paper);display:grid;place-items:center;box-shadow:0 6px 16px #7b5a3c40;position:relative}
+.play svg{width:24px;height:24px}
+.play.loading::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:3px solid transparent;border-top-color:var(--green);animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:20px;padding:7px 12px;font-size:12px;font-weight:650;display:flex;align-items:center;gap:6px;color:var(--ink);background:var(--paper)}
+.chip svg{width:14px;height:14px}
+.chip.active{color:var(--orange);border-color:var(--orange)}
+
+/* Hojas */
+.scrim{position:fixed;inset:0;background:#0007;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:86vh;max-height:86dvh;background:var(--card);border-radius:22px 22px 0 0;z-index:21;transform:translateY(105%);transition:transform .25s ease;display:flex;flex-direction:column;max-width:720px;margin:0 auto;padding-bottom:var(--safe-b)}
+.sheet.show{transform:none}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
+.sheet-h h3{margin:0;font-size:17px;letter-spacing:-.03em}
+.sheet-h::before{content:"";position:absolute;top:7px;left:50%;width:38px;height:4px;border-radius:4px;background:var(--line);transform:translateX(-50%)}
+.sheet-body{overflow:auto;padding:4px 18px 20px}
+.close{width:34px;height:34px;border-radius:50%;background:var(--soft);display:grid;place-items:center}
+.close svg{width:16px}
+.ch-item{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;padding:13px 10px;border-radius:12px;font-size:14px}
+.ch-item span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-item small{color:var(--muted);font-size:11px;flex:none}
+.ch-item.cur{background:var(--lime);font-weight:700}
+.field{margin-bottom:16px}
+.field>label,.field>.lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,select.input{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:12px;font-size:15px;outline:none}
+.input:focus{border-color:var(--green)}
+.speeds{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.speeds button{flex:1;min-width:52px;padding:10px 0;border-radius:10px;background:var(--soft);font-size:13px;font-weight:650}
+.speeds button.on{background:var(--green);color:var(--paper)}
+.row{display:flex;gap:8px;align-items:center}
+.btn{padding:12px 16px;border-radius:12px;background:var(--green);color:var(--paper);font-weight:650;font-size:14px;flex:none}
+.btn.ghost{background:var(--soft);color:var(--ink)}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--line)}
+.hint{font-size:12px;color:var(--muted);line-height:1.45;margin-top:7px}
+.opt{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 10px;border-radius:12px;font-size:15px;text-align:left}
+.opt.on{background:var(--lime);font-weight:700}
+.dlbox{margin-top:10px;padding:12px;border-radius:12px;background:var(--soft);font-size:13px;line-height:1.4}
+.dlbox.ok{background:var(--lime)}
+.dlbox.err{color:var(--danger);background:transparent;border:1px solid var(--danger)}
+.dlbar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:8px}
+.dlbar i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+.fontrow{display:flex;align-items:center;gap:10px}
+.fontrow button{width:48px;height:42px;border-radius:12px;background:var(--soft);font-family:Georgia,serif;font-size:16px}
+.fontrow span{flex:1;text-align:center;font-size:13px;color:var(--muted)}
+
+.toast{position:fixed;left:50%;bottom:calc(150px + var(--safe-b));transform:translate(-50%,10px);opacity:0;pointer-events:none;background:#3b2f22;color:#f6ecd6;padding:11px 16px;border-radius:12px;font-size:13px;transition:.25s;z-index:40;max-width:calc(100% - 32px);text-align:center;line-height:1.35}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.busy{position:fixed;inset:0;background:#0006;z-index:50;display:grid;place-items:center}
+.busy div{background:var(--card);border-radius:18px;padding:22px 26px;font-size:14px;display:flex;gap:12px;align-items:center;max-width:80%}
+.spinner{width:22px;height:22px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--green);animation:spin .9s linear infinite;flex:none}
+#fileInput{display:none}
+@media (min-width:900px){.text{padding:34px}.player{padding-left:max(16px,calc(50% - 340px));padding-right:max(16px,calc(50% - 340px))}}
+</style>
+</head>
+<body>
+
+<!-- ============ BIBLIOTECA ============ -->
+<section class="view" id="libraryView">
+  <div class="lib-scroll">
+    <div class="lib-top">
+      <div class="brand"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div>Voz y Página</div>
+      <button class="round" id="libSettings" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+    <h1>Escucha donde<br>lo dejaste.</h1>
+    <p class="lead">Tus libros en voz alta, con la posición guardada.</p>
+    <button class="continue hidden" id="continueCard"></button>
+    <div class="section-h"><h2>Tu biblioteca</h2><span class="subtle" id="bookCount"></span></div>
+    <div id="bookList"></div>
+  </div>
+  <button class="fab" id="addBook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>Añadir libro</button>
+  <input type="file" id="fileInput" accept=".epub,.pdf,.txt,application/epub+zip,application/pdf,text/plain">
+</section>
+
+<!-- ============ LECTOR ============ -->
+<section class="view hidden" id="readerView">
+  <header class="r-top">
+    <button class="icon" id="backToLib" aria-label="Biblioteca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+    <div class="r-title"><strong id="rBook"></strong><span id="rChapter"></span></div>
+    <button class="icon" id="openSearch" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button class="icon" id="addBookmark" aria-label="Poner marcador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>
+    <button class="icon" id="openChapters" aria-label="Capítulos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></button>
+    <button class="icon" id="openSettings" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></button>
+  </header>
+  <div class="text" id="textScroll"><div class="text-inner" id="textInner"></div></div>
+  <div class="player">
+    <div class="prog-row"><span id="tLeft">0%</span><input type="range" id="seek" min="0" max="0" value="0" aria-label="Posición en el capítulo"><span id="tRight">—</span></div>
+    <div class="status-line" id="status"></div>
+    <div id="diagBanner" class="hidden" style="margin:6px auto 8px;max-width:520px;border:1px solid var(--orange);border-radius:12px;padding:10px 12px;font-size:12px;line-height:1.45;color:var(--ink);background:var(--paper)"></div>
+    <div class="controls">
+      <button class="cbtn" id="prevCh" aria-label="Capítulo anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg></button>
+      <button class="cbtn" id="back" aria-label="Retroceder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg></button>
+      <button class="play" id="play" aria-label="Reproducir"><svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 12 7-12 7z"/></svg></button>
+      <button class="cbtn" id="fwd" aria-label="Avanzar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg></button>
+      <button class="cbtn" id="nextCh" aria-label="Capítulo siguiente"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg></button>
+    </div>
+    <div class="chips">
+      <button class="chip" id="speedChip">1×</button>
+      <button class="chip" id="voiceChip"></button>
+      <button class="chip" id="carChip">🚗 Coche</button>
+      <button class="chip" id="timerChip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><span id="timerTxt">Temporizador</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOJAS ============ -->
+<div class="scrim" id="scrim"></div>
+
+<div class="sheet" id="chaptersSheet">
+  <div class="sheet-h"><h3>Capítulos y marcadores</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body"><div id="bmList"></div><div id="chapterList"></div></div>
+</div>
+
+<div class="sheet" id="searchSheet">
+  <div class="sheet-h"><h3>Buscar en el libro</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body">
+    <input class="input" id="searchInput" type="search" placeholder="Escribe una palabra o un nombre…" autocomplete="off">
+    <div class="hint" id="searchInfo"></div>
+    <div id="searchResults" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<div class="sheet" id="timerSheet">
+  <div class="sheet-h"><h3>Temporizador</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body" id="timerList"></div>
+</div>
+
+<div class="sheet" id="bookSheet">
+  <div class="sheet-h"><h3 id="bookSheetTitle">Libro</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body">
+    <button class="opt" id="bsCover">Poner carátula (elegir imagen)</button>
+    <button class="opt" id="bsRestart">Empezar desde el principio</button>
+    <input type="file" id="coverInput" accept="image/*" style="display:none">
+    <button class="opt" id="bsDelete" style="color:var(--danger)">Eliminar de la biblioteca</button>
+  </div>
+</div>
+
+<div class="sheet" id="settingsSheet">
+  <div class="sheet-h"><h3>Ajustes de lectura</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body">
+    <div id="piperFields">
+      <div class="field"><label>Voz natural (gratis, funciona sin Internet)</label>
+        <div class="row"><select class="input" id="pVoice"></select><button class="btn ghost" id="testPiper">Probar</button></div>
+        <div class="hint">Elige una y toca «Probar» para oírla (la primera vez se descarga, mejor con wifi). La de mujer suena más natural pero pesa más y tarda más en generarse: con ella usa «💾 Guardar capítulos» por la tarde y por la noche sonará sin esperas.</div>
+        
+        <div class="dlbox" id="dlBox"><div id="piperState">Comprobando…</div><div class="dlbar hidden" id="dlBar"><i id="dlFill"></i></div></div>
+        <div class="row" style="margin-top:9px"><button class="btn" id="dlPiper">Descargar ahora</button><button class="btn danger" id="rmPiper">Borrar la voz</button></div>
+        <details style="margin-top:12px"><summary class="subtle" style="cursor:pointer">Diagnóstico (si algo falla, mándame esto)</summary><pre class="subtle" id="piperDiag" style="white-space:pre-wrap;font-size:11px;margin:8px 0 0"></pre></details>
+      </div>
+    </div>
+    <div class="field"><span class="lbl">Tema de lectura</span><div class="themes" id="themeGrid"></div></div>
+    <div class="field"><span class="lbl">Tipo de letra</span><div class="seg3" id="fontSeg"><button data-f="libro" style="font-family:Georgia,serif">De libro</button><button data-f="clara" style="font-family:Verdana,sans-serif">Clara</button><button data-f="atkinson">Muy legible</button></div>
+      <div class="hint">«Muy legible» es Atkinson Hyperlegible, una letra pensada para personas con baja visión.</div></div>
+    <div class="field"><span class="lbl">Espacio entre líneas</span><div class="seg3" id="lhSeg"><button data-v="1.6">Normal</button><button data-v="1.95">Amplio</button><button data-v="2.3">Muy amplio</button></div></div>
+    <div class="field"><span class="lbl">Espacio entre letras</span><div class="seg3" id="lsSeg"><button data-v="0">Normal</button><button data-v="0.03em">Amplio</button><button data-v="0.07em">Muy amplio</button></div></div>
+    <div class="field"><span class="lbl">Ayudas</span>
+      <button class="opt" id="optBold">Letra más gruesa</button>
+      <button class="opt" id="optFocus">Modo foco (atenúa todo menos la frase que se lee)</button>
+      <button class="opt" id="optBig">Botones grandes</button>
+    </div>
+    <div class="field"><span class="lbl">Velocidad</span><div class="speeds" id="speeds"></div></div>
+    <div class="field"><span class="lbl">Tamaño de letra</span>
+      <div class="fontrow"><button id="fontDown" aria-label="Letra más pequeña">A−</button><span id="fontVal"></span><button id="fontUp" aria-label="Letra más grande">A+</button></div>
+    </div>
+    <div class="field"><label for="rewindSel">Al apagarse con el temporizador</label>
+      <select class="input" id="rewindSel"><option value="0">Seguir justo donde se paró</option><option value="1">Retroceder 1 minuto</option><option value="2">Retroceder 2 minutos</option><option value="5">Retroceder 5 minutos</option></select>
+      <div class="hint">Para no perderte lo que ya no oíste mientras te dormías. Con la pantalla encendida, agitar el móvil suma 10 minutos al temporizador.</div>
+    </div>
+    <div class="field"><label for="bgSel">Sonido de fondo</label>
+      <div class="row"><select class="input" id="bgSel"><option value="">Ninguno</option><option value="rain">Lluvia</option><option value="waves">Olas</option><option value="brown">Ruido suave</option></select></div>
+      <input type="range" id="bgVol" min="0" max="100" value="35" aria-label="Volumen del sonido de fondo" style="width:100%;margin-top:10px">
+      <div class="hint">Suena bajito a la vez que la voz y se apaga con el temporizador.</div>
+    </div>
+    <div class="field"><label for="dictText">Corregir pronunciaciones</label>
+      <textarea class="input" id="dictText" rows="4" placeholder="Harker = Járker&#10;Christmas = Crísmas" style="resize:vertical;font-family:inherit"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn ghost" id="dictSave">Guardar</button><button class="btn ghost" id="dictTest">Probar</button></div>
+      <div class="hint">Una por línea: cómo está escrito = cómo debe sonar. Se aplica a todos los libros.</div>
+    </div>
+    <div class="field"><span class="lbl">Copia de seguridad</span>
+      <div class="row"><button class="btn ghost" id="backupBtn">Guardar copia</button><button class="btn ghost" id="restoreBtn">Restaurar</button></div>
+      <input type="file" id="restoreInput" accept=".json,application/json" style="display:none">
+      <div class="hint">Guarda en un archivo tus libros, por dónde vas, los marcadores y los ajustes. Si borras Chrome o cambias de móvil, «Restaurar» lo recupera todo.</div>
+    </div>
+    <div class="field"><span class="lbl">Audio guardado en el móvil</span>
+      <div class="row"><span class="subtle" id="cacheInfo" style="flex:1">—</span><button class="btn danger" id="clearCache">Borrar</button></div>
+      <div class="hint">Los capítulos guardados se borran solos cuando terminas de escucharlos.</div>
+    </div>
+  </div>
+</div>
+
+<div id="previewWarn" class="hidden" style="position:fixed;top:0;left:0;right:0;z-index:60;background:#b2493a;color:#fff;padding:12px 16px;font-size:13px;line-height:1.4;text-align:center">Estás viendo una <b>vista previa</b>: aquí la app no puede conectarse a Internet. Descarga el archivo y ábrelo con <b>Chrome</b>.</div>
+<div class="car hidden" id="carView">
+  <div class="car-top"><b id="carBook"></b><button class="car-exit" id="carExit">Salir</button></div>
+  <div class="car-mid">
+    <div class="car-ch" id="carCh"></div>
+    <button class="car-play" id="carPlay" aria-label="Reproducir o pausar"><svg id="carIcon" viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 12 7-12 7z"/></svg></button>
+    <div class="car-st" id="carSt"></div>
+  </div>
+  <div class="car-row"><button id="carBack">−30 s</button><button id="carFwd">+30 s</button><button id="carNext">Cap. ⏭</button></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="busy hidden" id="busy"><div><span class="spinner"></span><span id="busyTxt">Procesando…</span></div></div>
+<audio id="audio" preload="auto" playsinline></audio>
+
+<script>
+(() => {
+'use strict';
+
+/* ================= CONFIGURACIÓN ================= */
+const PIPER_VOICES = [
+  { id: 'carlfm', model: 'es_ES-carlfm-x_low', label: 'Hombre · rápida', mb: 28 },
+  { id: 'sharvard-F', model: 'es_ES-sharvard-medium', speaker: 'F', label: 'Mujer · pesada', mb: 77 }
+];
+const PIPER_HF = ['https://huggingface.co/rhasspy/piper-voices/resolve/main/', 'https://huggingface.co/diffusionstudio/piper-voices/resolve/main/'];
+const piperPath = model => { const [loc, name, q] = model.split('-'); return `${loc.split('_')[0]}/${loc}/${name}/${q}/${model}.onnx`; };
+const SPEEDS = [0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75];
+const CHARS_PER_SEC = 14.5; // ritmo medio de narración en español a 1×
+const COVER_COLORS = ['#c7835c','#3c5a46','#5b6f9a','#a0566b','#7a6a3c','#4f8a8b','#8a5a9e','#b06a3b'];
+
+/* ================= UTILIDADES ================= */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let toastTimer;
+function toast(msg, ms = 3200) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms); }
+function busy(txt) { $('busy').classList.toggle('hidden', !txt); if (txt) $('busyTxt').textContent = txt; }
+function fmtDur(sec) { sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); if (h) return `${h} h ${m} min`; if (m) return `${m} min`; return `${sec} s`; }
+function fmtClock(sec) { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function hashColor(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return COVER_COLORS[Math.abs(h) % COVER_COLORS.length]; }
+function initials(t) { const w = t.replace(/[^\p{L}\p{N} ]/gu, '').trim().split(/\s+/); return ((w[0] || '?')[0] + ((w[1] || '')[0] || '')).toUpperCase(); }
+
+const settings = (() => {
+  const defaults = { pVoice: 'carlfm', speed: 1, font: 19 };
+  let s = { ...defaults };
+  try { Object.assign(s, JSON.parse(localStorage.getItem('vp-settings') || '{}')); } catch (e) {}
+  return {
+    get: k => s[k],
+    set(k, v) { s[k] = v; try { localStorage.setItem('vp-settings', JSON.stringify(s)); } catch (e) {} }
+  };
+})();
+/* ================= ALMACENAMIENTO (IndexedDB) ================= */
+const db = (() => {
+  let p, memory = null;
+  function open() {
+    if (p) return p;
+    p = new Promise((res, rej) => {
+      if (!window.indexedDB) return rej(new Error('sin IndexedDB'));
+      const r = indexedDB.open('voz-y-pagina', 3);
+      r.onupgradeneeded = () => { const d = r.result; for (const [n, o] of [['meta', { keyPath: 'id' }], ['content', { keyPath: 'id' }], ['audio'], ['models'], ['prepared']]) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n, o); };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    }).catch(e => { memory = { meta: new Map(), content: new Map(), audio: new Map(), models: new Map(), prepared: new Map() }; toast('Este navegador no deja guardar libros; se perderán al cerrar.'); return null; });
+    return p;
+  }
+  async function run(store, mode, fn) {
+    const d = await open();
+    if (!d) return fn(null, memory[store]);
+    return new Promise((res, rej) => {
+      const t = d.transaction(store, mode), st = t.objectStore(store); let out;
+      const r = fn(st); if (r && 'onsuccess' in r) r.onsuccess = () => out = r.result;
+      t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error('Operación cancelada (¿sin espacio?)'));
+    });
+  }
+  const kp = { meta: 'id', content: 'id' };
+  return {
+    get: (s, k) => run(s, 'readonly', (st, m) => st ? st.get(k) : m.get(k)),
+    put: (s, v, k) => run(s, 'readwrite', (st, m) => st ? (k === undefined ? st.put(v) : st.put(v, k)) : m.set(k === undefined ? v[kp[s]] : k, v)),
+    del: (s, k) => run(s, 'readwrite', (st, m) => st ? st.delete(k) : m.delete(k)),
+    all: s => run(s, 'readonly', (st, m) => st ? st.getAll() : [...m.values()]),
+    count: s => run(s, 'readonly', (st, m) => st ? st.count() : m.size),
+    keys: s => run(s, 'readonly', (st, m) => st ? st.getAllKeys() : [...m.keys()]),
+    clear: s => run(s, 'readwrite', (st, m) => st ? st.clear() : m.clear())
+  };
+})();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+/* ================= IMPORTACIÓN: EPUB ================= */
+async function readZip(file) {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const view = new DataView(buf.buffer);
+  let eocd = -1;
+  for (let p = buf.length - 22; p >= Math.max(0, buf.length - 65558); p--) if (view.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
+  if (eocd < 0) throw new Error('El archivo no es un EPUB válido (no es un ZIP).');
+  const count = view.getUint16(eocd + 10, true); let pos = view.getUint32(eocd + 16, true);
+  if (count === 0xffff || pos === 0xffffffff) throw new Error('Este EPUB usa un formato ZIP64 que no se admite.');
+  const entries = new Map(), dec = new TextDecoder();
+  for (let i = 0; i < count; i++) {
+    if (view.getUint32(pos, true) !== 0x02014b50) throw new Error('El índice interno del EPUB está dañado.');
+    const flags = view.getUint16(pos + 8, true), method = view.getUint16(pos + 10, true), csize = view.getUint32(pos + 20, true);
+    const nl = view.getUint16(pos + 28, true), el = view.getUint16(pos + 30, true), cl = view.getUint16(pos + 32, true), local = view.getUint32(pos + 42, true);
+    const name = dec.decode(buf.subarray(pos + 46, pos + 46 + nl));
+    entries.set(name, { name, flags, method, csize, local });
+    pos += 46 + nl + el + cl;
+  }
+  async function read(name) {
+    let e = entries.get(name);
+    if (!e) { const low = name.toLowerCase(); for (const [k, v] of entries) if (k.toLowerCase() === low) { e = v; break; } }
+    if (!e) return null;
+    if (e.flags & 1) throw new Error('Este EPUB tiene DRM (está cifrado) y no se puede leer.');
+    const p = e.local, start = p + 30 + view.getUint16(p + 26, true) + view.getUint16(p + 28, true);
+    const raw = buf.subarray(start, start + e.csize);
+    if (e.method === 0) return dec.decode(raw);
+    if (e.method === 8) {
+      if (!window.DecompressionStream) throw new Error('Tu navegador es antiguo y no puede abrir EPUB. Actualiza Chrome o Safari.');
+      const stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return await new Response(stream).text();
+    }
+    throw new Error('El EPUB usa una compresión no admitida.');
+  }
+  async function readBytes(name) {
+    let e = entries.get(name);
+    if (!e) { const low = name.toLowerCase(); for (const [k, v] of entries) if (k.toLowerCase() === low) { e = v; break; } }
+    if (!e || (e.flags & 1)) return null;
+    const p = e.local, start = p + 30 + view.getUint16(p + 26, true) + view.getUint16(p + 28, true);
+    const raw = buf.subarray(start, start + e.csize);
+    if (e.method === 0) return raw.slice();
+    if (e.method === 8 && window.DecompressionStream) return new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    return null;
+  }
+  return { entries, read, readBytes };
+}
+
+function resolvePath(base, href) {
+  href = href.split('#')[0];
+  try { href = decodeURIComponent(href); } catch (e) {}
+  const parts = (href.startsWith('/') ? href.slice(1) : base + href).split('/');
+  const out = [];
+  for (const p of parts) { if (p === '..') out.pop(); else if (p !== '.' && p !== '') out.push(p); }
+  return out.join('/');
+}
+
+const BLOCK = new Set(['P','DIV','H1','H2','H3','H4','H5','H6','LI','BLOCKQUOTE','SECTION','ARTICLE','HEADER','FOOTER','TR','DT','DD','PRE','FIGCAPTION','ASIDE','TABLE','UL','OL','DL','HR','ADDRESS','CENTER']);
+function htmlToText(root) {
+  if (!root) return '';
+  root.querySelectorAll('script,style,noscript,svg,math,head,title').forEach(n => n.remove());
+  // quitar llamadas a notas tipo [1] o superíndices numéricos
+  root.querySelectorAll('sup').forEach(n => { if (/^\s*[\d*†‡]+\s*$/.test(n.textContent)) n.remove(); });
+  let out = '';
+  (function walk(n) {
+    for (let c = n.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) out += c.nodeValue.replace(/\s+/g, ' ');
+      else if (c.nodeType === 1) {
+        const tag = c.tagName.toUpperCase();
+        if (tag === 'BR') { out += '\n'; continue; }
+        if (tag === 'IMG') { const alt = c.getAttribute('alt'); if (alt && alt.length > 3 && !/^(cover|portada|image|imagen)/i.test(alt)) out += ' '; continue; }
+        const block = BLOCK.has(tag);
+        if (block) out += '\n';
+        walk(c);
+        if (block) out += '\n';
+      }
+    }
+  })(root);
+  return out.split('\n').map(s => s.trim()).filter(Boolean).join('\n');
+}
+
+function parseXml(str, type) {
+  const p = new DOMParser();
+  let d = p.parseFromString(str, type);
+  if (d.querySelector('parsererror')) d = p.parseFromString(str, 'text/html');
+  return d;
+}
+
+async function makeThumb(source) {
+  try {
+    const bmp = source instanceof Blob ? await createImageBitmap(source) : source;
+    const w = 240, h = Math.round(w * (bmp.height / bmp.width));
+    const c = document.createElement('canvas'); c.width = w; c.height = Math.min(h, 400);
+    c.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    return c.toDataURL('image/jpeg', 0.8);
+  } catch (e) { return null; }
+}
+async function epubCover(zip, items, opf, base, byTag) {
+  try {
+    const all = [...items.values()];
+    const isImg = i => /image\/(jpe?g|png|webp|gif)/i.test(i.getAttribute('media-type') || '') || /\.(jpe?g|png|webp|gif)$/i.test(i.getAttribute('href') || '');
+    let it = all.find(i => /cover-image/.test(i.getAttribute('properties') || ''));
+    if (!it) { const m = byTag(opf, 'meta').find(m => m.getAttribute('name') === 'cover'); const c = m && items.get(m.getAttribute('content')); if (c && isImg(c)) it = c; }
+    if (!it) it = all.find(i => isImg(i) && /cover|portada|cubierta/i.test((i.getAttribute('id') || '') + (i.getAttribute('href') || '')));
+    if (!it) it = all.find(isImg);
+    if (!it) return null;
+    const bytes = await zip.readBytes(resolvePath(base, it.getAttribute('href')));
+    if (!bytes) return null;
+    return await makeThumb(new Blob([bytes], { type: it.getAttribute('media-type') || 'image/jpeg' }));
+  } catch (e) { return null; }
+}
+async function importEpub(file) {
+  const zip = await readZip(file);
+  const cx = await zip.read('META-INF/container.xml');
+  if (!cx) throw new Error('No es un EPUB estándar (falta META-INF/container.xml).');
+  const enc = await zip.read('META-INF/encryption.xml');
+  if (enc && /EncryptedData/.test(enc) && !/obfuscation|font/i.test(enc)) throw new Error('Este EPUB tiene DRM y no se puede leer. Usa una copia sin protección.');
+  const opfPath = (cx.match(/full-path\s*=\s*["']([^"']+)["']/i) || [])[1];
+  if (!opfPath) throw new Error('No se encuentra el índice del EPUB.');
+  const opfStr = await zip.read(opfPath);
+  if (!opfStr) throw new Error('Falta el índice interno del EPUB.');
+  const base = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+  const opf = parseXml(opfStr, 'application/xml');
+  const byTag = (root, name) => [...root.getElementsByTagName('*')].filter(n => n.localName === name);
+  const title = (byTag(opf, 'title')[0]?.textContent || '').trim() || file.name.replace(/\.epub$/i, '');
+  const author = (byTag(opf, 'creator')[0]?.textContent || '').trim();
+  const items = new Map(byTag(opf, 'item').map(x => [x.getAttribute('id'), x]));
+  const spine = byTag(opf, 'itemref');
+
+  // títulos del índice (EPUB3 nav o EPUB2 ncx)
+  const tocTitles = new Map();
+  try {
+    const navItem = [...items.values()].find(i => /\bnav\b/.test(i.getAttribute('properties') || ''));
+    if (navItem) {
+      const navPath = resolvePath(base, navItem.getAttribute('href'));
+      const navBase = navPath.includes('/') ? navPath.slice(0, navPath.lastIndexOf('/') + 1) : '';
+      const nd = parseXml(await zip.read(navPath) || '', 'application/xhtml+xml');
+      const navs = [...nd.getElementsByTagName('nav')];
+      const toc = navs.find(n => /toc/.test(n.getAttribute('epub:type') || n.getAttributeNS('http://www.idpf.org/2007/ops', 'type') || '')) || navs[0];
+      toc && toc.querySelectorAll('a[href]').forEach(a => { const k = resolvePath(navBase, a.getAttribute('href')); const t = a.textContent.replace(/\s+/g, ' ').trim(); if (t && !tocTitles.has(k)) tocTitles.set(k, t); });
+    }
+    if (!tocTitles.size) {
+      const tocId = byTag(opf, 'spine')[0]?.getAttribute('toc');
+      const ncxItem = items.get(tocId) || [...items.values()].find(i => /ncx/.test(i.getAttribute('media-type') || ''));
+      if (ncxItem) {
+        const ncxPath = resolvePath(base, ncxItem.getAttribute('href'));
+        const ncxBase = ncxPath.includes('/') ? ncxPath.slice(0, ncxPath.lastIndexOf('/') + 1) : '';
+        const nd = parseXml(await zip.read(ncxPath) || '', 'application/xml');
+        byTag(nd, 'navPoint').forEach(np => {
+          const label = byTag(np, 'text')[0]?.textContent.trim(); const src = byTag(np, 'content')[0]?.getAttribute('src');
+          if (label && src) { const k = resolvePath(ncxBase, src); if (!tocTitles.has(k)) tocTitles.set(k, label); }
+        });
+      }
+    }
+  } catch (e) { /* el índice es opcional */ }
+
+  const chapters = [];
+  for (const ref of spine) {
+    const item = items.get(ref.getAttribute('idref'));
+    if (!item) continue;
+    const mt = item.getAttribute('media-type') || '';
+    if (mt && !/html|xml/.test(mt)) continue;
+    const path = resolvePath(base, item.getAttribute('href'));
+    const html = await zip.read(path);
+    if (!html) continue;
+    const doc = parseXml(html, /xhtml|xml/.test(mt) ? 'application/xhtml+xml' : 'text/html');
+    const body = doc.body || doc.getElementsByTagName('body')[0] || doc.documentElement;
+    const heading = body.querySelector && body.querySelector('h1,h2,h3');
+    const text = htmlToText(body);
+    if (text.replace(/\s/g, '').length < 2) continue;
+    let ctitle = tocTitles.get(path) || (heading && heading.textContent.replace(/\s+/g, ' ').trim()) || '';
+    if (ctitle.length > 90) ctitle = ctitle.slice(0, 87) + '…';
+    // fusionar fragmentos muy cortos sin título con el siguiente (portadillas, etc.)
+    const prev = chapters[chapters.length - 1];
+    if (prev && !tocTitles.get(path) && prev.text.length < 200 && !prev.fromToc) { prev.text += '\n' + text; if (!prev.title) prev.title = ctitle; continue; }
+    chapters.push({ title: ctitle, text, fromToc: tocTitles.has(path) });
+  }
+  if (!chapters.length) throw new Error('Se abrió el EPUB pero no contiene texto legible.');
+  chapters.forEach((c, i) => { c.title = c.title || `Sección ${i + 1}`; delete c.fromToc; });
+  const cover = await epubCover(zip, items, opf, base, byTag);
+  return { title, author, type: 'epub', chapters, cover };
+}
+
+/* ================= IMPORTACIÓN: PDF ================= */
+let pdfjsLib = null;
+async function loadPdfJs() {
+  if (pdfjsLib) return pdfjsLib;
+  const v = '4.10.38';
+  try {
+    pdfjsLib = await import(`https://cdn.jsdelivr.net/npm/pdfjs-dist@${v}/build/pdf.min.mjs`);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${v}/build/pdf.worker.min.mjs`;
+  } catch (e) { throw new Error('No se pudo cargar el lector de PDF. Necesitas conexión a Internet la primera vez.'); }
+  return pdfjsLib;
+}
+async function importPdf(file) {
+  const lib = await loadPdfJs();
+  const pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  let title = file.name.replace(/\.pdf$/i, ''), author = '';
+  try { const m = await pdf.getMetadata(); if (m.info?.Title && m.info.Title.trim().length > 2) title = m.info.Title.trim(); if (m.info?.Author) author = m.info.Author.trim(); } catch (e) {}
+  const pages = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    busy(`Leyendo PDF… página ${i} de ${pdf.numPages}`);
+    const tc = await (await pdf.getPage(i)).getTextContent();
+    let line = '', lines = [];
+    for (const it of tc.items) { line += it.str; if (it.hasEOL) { lines.push(line.trim()); line = ''; } else if (it.str && !/\s$/.test(it.str)) line += ''; }
+    if (line.trim()) lines.push(line.trim());
+    // unir líneas en párrafos: un salto real cuando la línea termina en puntuación final y es corta
+    let paras = [], cur = '';
+    lines = lines.filter(l => l && !/^\d{1,4}$/.test(l)); // quita números de página sueltos
+    lines.forEach((l, idx) => {
+      if (cur.endsWith('-') && /^[a-záéíóúñü]/.test(l)) cur = cur.slice(0, -1) + l; else cur = cur ? cur + ' ' + l : l;
+      const avg = 60; if (/[.!?:»"”]$/.test(l) && l.length < avg * 0.85) { paras.push(cur); cur = ''; }
+    });
+    if (cur) paras.push(cur);
+    pages.push(paras.join('\n'));
+  }
+  const total = pages.join('').replace(/\s/g, '').length;
+  if (total < 50) throw new Error('Este PDF parece escaneado (son imágenes) y no tiene texto que leer.');
+  const per = pdf.numPages > 40 ? 10 : pdf.numPages > 12 ? 5 : pdf.numPages;
+  const chapters = [];
+  for (let i = 0; i < pages.length; i += per) {
+    const text = pages.slice(i, i + per).filter(Boolean).join('\n');
+    if (text.trim()) chapters.push({ title: per >= pages.length ? 'Documento' : `Páginas ${i + 1}–${Math.min(i + per, pages.length)}`, text });
+  }
+  let cover = null;
+  try { const pg = await pdf.getPage(1), vp = pg.getViewport({ scale: 1 }), sc = 240 / vp.width, v2 = pg.getViewport({ scale: sc }); const cv = document.createElement('canvas'); cv.width = v2.width; cv.height = v2.height; await pg.render({ canvasContext: cv.getContext('2d'), viewport: v2 }).promise; cover = cv.toDataURL('image/jpeg', 0.8); } catch (e) {}
+  return { title, author, type: 'pdf', chapters, cover };
+}
+
+/* ================= IMPORTACIÓN: TXT ================= */
+async function importTxt(file) {
+  let text = await file.text();
+  text = text.replace(/\r\n?/g, '\n').replace(/\n{2,}/g, '\u0000').replace(/\n/g, ' ').replace(/\u0000/g, '\n');
+  const chapters = []; let cur = '', n = 1;
+  for (const p of text.split('\n')) {
+    const isHead = /^\s*(cap[ií]tulo|chapter|parte)\b/i.test(p) && p.length < 80;
+    if ((isHead && cur.length > 500) || cur.length > 20000) { chapters.push({ title: '', text: cur.trim() }); cur = ''; }
+    cur += p.trim() + '\n';
+  }
+  if (cur.trim()) chapters.push({ title: '', text: cur.trim() });
+  chapters.forEach(c => { const first = c.text.split('\n')[0]; c.title = (/^\s*(cap[ií]tulo|chapter|parte)\b/i.test(first) && first.length < 80) ? first : `Parte ${n}`; n++; });
+  if (!chapters.length) throw new Error('El archivo de texto está vacío.');
+  return { title: file.name.replace(/\.txt$/i, ''), author: '', type: 'txt', chapters };
+}
+
+async function sniffType(file) {
+  try { const h = new Uint8Array(await file.slice(0, 64).arrayBuffer()); const t = String.fromCharCode(...h);
+    if (t.startsWith('%PDF')) return 'pdf'; if (h[0] === 0x50 && h[1] === 0x4b) return 'epub'; if (!/[\x00-\x08]/.test(t)) return 'txt'; } catch (e) {}
+  return '';
+}
+async function importFile(file) {
+  let ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!['epub', 'pdf', 'txt'].includes(ext)) ext = await sniffType(file);
+  if (!['epub', 'pdf', 'txt'].includes(ext)) { toast('Elige un archivo EPUB, PDF o TXT.'); return; }
+  busy('Abriendo ' + file.name + '…');
+  try {
+    const book = ext === 'epub' ? await importEpub(file) : ext === 'pdf' ? await importPdf(file) : await importTxt(file);
+    const id = 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const lens = book.chapters.map(c => c.text.length);
+    const meta = { id, title: book.title, author: book.author, type: book.type, chapterTitles: book.chapters.map(c => c.title), chapterLens: lens, totalChars: lens.reduce((a, b) => a + b, 0), added: Date.now(), lastOpened: Date.now(), pos: { ch: 0, s: 0 }, color: hashColor(book.title), cover: book.cover || null };
+    await db.put('content', { id, chapters: book.chapters.map(c => c.text) });
+    await db.put('meta', meta);
+    busy(null);
+    toast('«' + book.title + '» añadido · ' + book.chapters.length + ' capítulos');
+    await renderLibrary();
+    openBook(id);
+  } catch (e) {
+    busy(null); console.error(e);
+    toast(e.message || 'No se pudo abrir el archivo.', 5000);
+  }
+}
+
+/* ================= BIBLIOTECA ================= */
+let libraryMetas = [];
+function fixPos(m) { if (!m) return m; try { const p = JSON.parse(localStorage.getItem('vp-pos-' + m.id) || 'null'); if (p && typeof p.ch === 'number') m.pos = p; } catch (e) {} return m; }
+function coverHtml(m) {
+  return m.cover ? `<div class="cover" style="background:#0002 url('${m.cover}') center/cover no-repeat"></div>` : `<div class="cover" style="background:${m.color}">${esc(initials(m.title))}</div>`;
+}
+function bookProgress(m) {
+  let done = 0; for (let i = 0; i < m.pos.ch; i++) done += m.chapterLens[i] || 0;
+  done += (m.pos.frac || 0) * (m.chapterLens[m.pos.ch] || 0);
+  return m.totalChars ? Math.min(1, done / m.totalChars) : 0;
+}
+async function renderLibrary() {
+  libraryMetas = (await db.all('meta') || []).map(fixPos).sort((a, b) => b.lastOpened - a.lastOpened);
+  $('bookCount').textContent = libraryMetas.length === 1 ? '1 libro' : libraryMetas.length + ' libros';
+  const list = $('bookList');
+  if (!libraryMetas.length) {
+    list.innerHTML = '<div class="empty"><strong>Aún no hay libros</strong>Pulsa «Añadir libro» y elige un EPUB, PDF o TXT del móvil. Se guarda aquí, no se sube a ningún sitio.</div>';
+    $('continueCard').classList.add('hidden'); return;
+  }
+  const last = libraryMetas[0];
+  const cc = $('continueCard');
+  cc.classList.remove('hidden');
+  cc.innerHTML = `${coverHtml(last)}<div style="min-width:0"><small>Seguir escuchando</small><strong>${esc(last.title)}</strong><span>${esc(last.chapterTitles[last.pos.ch] || '')} · ${Math.round(bookProgress(last) * 100)}%</span></div><div class="go"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m8 5 12 7-12 7z"/></svg></div>`;
+  cc.onclick = () => openBook(last.id, true);
+  list.innerHTML = libraryMetas.map(m => {
+    const pr = Math.round(bookProgress(m) * 100);
+    const left = fmtDur(m.totalChars * (1 - bookProgress(m)) / CHARS_PER_SEC / settings.get('speed'));
+    return `<div class="book" data-id="${m.id}" role="button" tabindex="0">${coverHtml(m)}<div class="book-info"><strong>${esc(m.title)}</strong><span class="meta">${esc(m.author ? m.author + ' · ' : '')}${m.type.toUpperCase()} · ${pr}% · quedan ${left}</span><div class="minibar"><i style="width:${pr}%"></i></div></div><button class="more" data-more="${m.id}" aria-label="Opciones"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button></div>`;
+  }).join('');
+}
+$('bookList').addEventListener('click', e => {
+  const more = e.target.closest('[data-more]');
+  if (more) { e.stopPropagation(); openBookMenu(more.dataset.more); return; }
+  const b = e.target.closest('.book'); if (b) openBook(b.dataset.id);
+});
+let menuBookId = null;
+function openBookMenu(id) {
+  menuBookId = id; const m = libraryMetas.find(x => x.id === id);
+  $('bookSheetTitle').textContent = m ? m.title : 'Libro';
+  openSheet('bookSheet');
+}
+$('bsDelete').onclick = async () => {
+  const m = libraryMetas.find(x => x.id === menuBookId); if (!m) return;
+  if (!confirm('¿Eliminar «' + m.title + '» de la biblioteca?')) return;
+  if (state.meta && state.meta.id === m.id) { stopAll(); state.meta = null; }
+  await db.del('meta', m.id); await db.del('content', m.id); deletePrepared(m.id + '|'); try { localStorage.removeItem('vp-pos-' + m.id); } catch (e) {}
+  closeSheets(); renderLibrary(); toast('Libro eliminado.');
+};
+$('bsCover').onclick = () => $('coverInput').click();
+$('coverInput').onchange = async () => {
+  const f = $('coverInput').files[0]; $('coverInput').value = '';
+  const m = libraryMetas.find(x => x.id === menuBookId); if (!f || !m) return;
+  const thumb = await makeThumb(f);
+  if (!thumb) { toast('No se pudo leer esa imagen.'); return; }
+  m.cover = thumb; if (state.meta && state.meta.id === m.id) state.meta.cover = thumb; await db.put('meta', m); closeSheets(); renderLibrary(); toast('Carátula puesta.');
+};
+$('bsRestart').onclick = async () => {
+  const m = libraryMetas.find(x => x.id === menuBookId); if (!m) return;
+  m.pos = { ch: 0, s: 0, frac: 0 }; await db.put('meta', m); try { localStorage.setItem('vp-pos-' + m.id, JSON.stringify(m.pos)); } catch (e) {}
+  closeSheets(); openBook(m.id);
+};
+$('addBook').onclick = () => $('fileInput').click();
+$('fileInput').onchange = () => { const f = $('fileInput').files[0]; $('fileInput').value = ''; if (f) importFile(f); };
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); document.body.classList.add('drag-over'); }));
+['dragleave', 'drop'].forEach(ev => document.addEventListener(ev, e => { e.preventDefault(); document.body.classList.remove('drag-over'); }));
+document.addEventListener('drop', e => { const f = e.dataTransfer?.files?.[0]; if (f) importFile(f); });
+
+/* ================= TEXTO → FRASES ================= */
+function splitSentences(text) {
+  const out = [];
+  const paras = text.split('\n').map(s => s.trim()).filter(Boolean);
+  const re = /[^.!?…]+(?:[.!?…]+[»"”’')\]]*|$)/g;
+  for (const p of paras) {
+    let pieces = p.match(re) || [p];
+    // fusiona abreviaturas típicas y trozos mínimos
+    const merged = [];
+    for (let s of pieces) {
+      s = s.trim(); if (!s) continue;
+      const prev = merged[merged.length - 1];
+      if (prev && (/\b(Sr|Sra|Srta|Dr|Dra|D|Dña|Ud|Uds|etc|pág|núm|art|vol|cap|St|Mr|Mrs|Ms)\.$/i.test(prev) || /\b[A-ZÁÉÍÓÚ]\.$/.test(prev) || s.length < 4)) merged[merged.length - 1] = prev + ' ' + s;
+      else merged.push(s);
+    }
+    // corta frases muy largas por comas/punto y coma
+    const final = [];
+    for (const s of merged) {
+      if (s.length <= 320) { final.push(s); continue; }
+      let cur = '';
+      for (const piece of s.split(/(?<=[,;:])\s+/)) {
+        if ((cur + ' ' + piece).length > 320 && cur) { final.push(cur); cur = piece; } else cur = cur ? cur + ' ' + piece : piece;
+      }
+      if (cur) final.push(cur);
+    }
+    final.forEach((t, i) => out.push({ t, p: i === 0 }));
+  }
+  return out;
+}
+
+/* ================= ESTADO DEL LECTOR ================= */
+const state = {
+  meta: null, chapters: null, ch: 0, s: 0, sentences: [], cum: [], spans: [],
+  playing: false, loading: false, token: 0,
+  current: null,          // trozo que suena ahora {start,end,text,offsets}
+  userScrollAt: 0
+};
+
+async function openBook(id, autoplay = false) {
+  stopAll(); prepReset();
+  const meta = fixPos(await db.get('meta', id)), content = await db.get('content', id);
+  if (!meta || !content) { toast('No se encuentra el libro.'); renderLibrary(); return; }
+  state.meta = meta; state.chapters = content.chapters;
+  meta.lastOpened = Date.now(); saveMeta(true);
+  piper.isDownloaded(piperVoice().model).then(ok => {
+    if (!ok) return;
+    piper.ensure(piperVoice()).then(() => {
+      if (state.playing || state.meta?.id !== id) return;
+      const c = chunkAt(state.s); getAudio(c).catch(() => {});
+      for (const n of upcomingChunks(c, 45)) getAudio(n).catch(() => {});
+    }).catch(() => {});
+  });
+  $('libraryView').classList.add('hidden'); $('readerView').classList.remove('hidden');
+  $('rBook').textContent = meta.title;
+  history.pushState({ reader: true }, '');
+  loadChapter(meta.pos.ch || 0, meta.pos.s || 0);
+  setStatus('');
+  if (autoplay) play();
+}
+function backToLibrary() {
+  pause(); $('readerView').classList.add('hidden'); $('libraryView').classList.remove('hidden'); renderLibrary();
+}
+$('backToLib').onclick = () => { if (history.state && history.state.reader) history.back(); else backToLibrary(); };
+window.addEventListener('popstate', () => { if (!$('readerView').classList.contains('hidden')) { if (document.querySelector('.sheet.show')) { closeSheets(); history.pushState({ reader: true }, ''); } else backToLibrary(); } });
+
+function loadChapter(ch, s = 0) {
+  ch = Math.max(0, Math.min(ch, state.chapters.length - 1));
+  state.ch = ch;
+  state.sentences = splitSentences(state.chapters[ch]);
+  if (!state.sentences.length) state.sentences = [{ t: '…', p: true }];
+  state.cum = []; let acc = 0; for (const x of state.sentences) { state.cum.push(acc); acc += x.t.length + 1; } state.chLen = acc;
+  state.s = Math.max(0, Math.min(s, state.sentences.length - 1));
+  // pintar
+  const inner = $('textInner'); inner.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  const h = document.createElement('h2'); h.textContent = state.meta.chapterTitles[ch] || ''; frag.appendChild(h);
+  let p = null; state.spans = [];
+  state.sentences.forEach((x, i) => {
+    if (x.p || !p) { p = document.createElement('p'); frag.appendChild(p); } else p.appendChild(document.createTextNode(' '));
+    const sp = document.createElement('span'); sp.className = 's'; sp.dataset.i = i; sp.textContent = x.t; p.appendChild(sp); state.spans.push(sp);
+  });
+  if (ch < state.chapters.length - 1) { const d = document.createElement('div'); d.className = 'ch-end'; d.innerHTML = '<button>Siguiente capítulo →</button>'; d.firstChild.onclick = () => jumpChapter(ch + 1); frag.appendChild(d); }
+  inner.appendChild(frag);
+  $('rChapter').textContent = `${state.meta.chapterTitles[ch] || ''} · ${ch + 1}/${state.chapters.length}`;
+  $('seek').max = state.sentences.length - 1;
+  highlight(state.s, true);
+  updateMediaMeta();
+}
+
+let lastOn = null;
+function highlight(i, forceScroll = false) {
+  state.s = i;
+  if (lastOn) lastOn.classList.remove('on');
+  const sp = state.spans[i]; if (sp) { sp.classList.add('on'); lastOn = sp; }
+  if (sp && (forceScroll || Date.now() - state.userScrollAt > 4000)) {
+    const box = $('textScroll'), r = sp.getBoundingClientRect(), br = box.getBoundingClientRect();
+    if (forceScroll || r.top < br.top + 40 || r.bottom > br.bottom - 60) box.scrollTo({ top: box.scrollTop + r.top - br.top - br.height * 0.33, behavior: forceScroll ? 'auto' : 'smooth' });
+  }
+  updateProgressUI();
+  savePosThrottled();
+}
+['touchstart', 'wheel'].forEach(ev => $('textScroll').addEventListener(ev, () => state.userScrollAt = Date.now(), { passive: true }));
+
+function updateProgressUI() {
+  const n = state.sentences.length, i = state.s;
+  const seek = $('seek'); seek.value = i; seek.style.setProperty('--p', (n > 1 ? i / (n - 1) * 100 : 0) + '%');
+  const frac = state.chLen ? state.cum[i] / state.chLen : 0;
+  state.meta.pos = { ch: state.ch, s: i, frac };
+  const bookPct = Math.round(bookProgress(state.meta) * 100);
+  const rate = settings.get('speed');
+  const chLeft = (state.chLen - state.cum[i]) / CHARS_PER_SEC / rate;
+  $('tLeft').textContent = bookPct + '% libro';
+  $('tRight').textContent = '−' + fmtDur(chLeft);
+}
+
+let saveT = 0;
+function saveMeta(now) { if (!state.meta) return; const m = state.meta; try { localStorage.setItem('vp-pos-' + m.id, JSON.stringify(m.pos)); } catch (e) {} clearTimeout(saveT); const go = () => db.put('meta', m).catch(() => {}); if (now) go(); else saveT = setTimeout(go, 1200); }
+function savePosThrottled() { saveMeta(false); }
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveMeta(true); else if (piper.workers.length) piper.healthCheck(); });
+window.addEventListener('pagehide', () => saveMeta(true));
+
+/* ================= REPRODUCCIÓN: CONTROL GENERAL ================= */
+const audio = $('audio');
+function setPlayIcon() {
+  $('playIcon').innerHTML = state.playing ? '<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>' : '<path d="m8 5 12 7-12 7z"/>';
+  $('play').setAttribute('aria-label', state.playing ? 'Pausar' : 'Reproducir');
+  $('play').classList.toggle('loading', state.playing && state.loading);
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = state.playing ? 'playing' : 'paused';
+}
+function setStatus(msg, err = false) { const el = $('status'); el.textContent = msg; el.classList.toggle('err', err); }
+function setLoading(v) { state.loading = v; setPlayIcon(); }
+
+function play() {
+  if (!state.meta) return;
+  const last = settings.get('lastTimer');
+  if (!timer.mode && last) { timer.set(last, false); toast(last === 'chapter' ? 'Temporizador: al terminar el capítulo' : `Temporizador: se parará en ${last} minutos`); }
+  state.playing = true; setPlayIcon();
+  piper.healthCheck(); setTimeout(() => prepareVoice(false), 3000); // comprobar generadores y seguir guardando por detrás
+  // reanudar el mismo trozo si está en pausa
+  if (state.current && audio.src && !audio.ended && state.s >= state.current.start && state.s < state.current.end && audio.paused && audio.currentTime > 0) {
+    audio.play().catch(err => playFailed(err)); setStatus(voiceLabel());
+  } else audioStart(state.s);
+  bgSound.start();
+}
+function pause() {
+  if (!state.playing && !state.loading) return;
+  state.playing = false; setLoading(false);
+  audio.pause();
+  setPlayIcon(); setStatus('En pausa'); saveMeta(true); bgSound.stop();
+}
+function stopAll() {
+  state.token++; state.playing = false; state.loading = false; state.current = null; cancelPrefetch();
+  try { audio.pause(); audio.removeAttribute('src'); audio.load(); } catch (e) {}
+  setPlayIcon(); bgSound.stop();
+}
+function playFailed(err) {
+  console.warn(err); state.playing = false; setLoading(false); setPlayIcon();
+  setStatus('Toca ▶ para continuar', false);
+}
+$('play').onclick = () => state.playing ? pause() : play();
+
+// Saltar a una frase concreta (desde el texto, la barra o los botones)
+function jumpTo(i, keepPlaying = state.playing) {
+  i = Math.max(0, Math.min(i, state.sentences.length - 1));
+  // si el destino cae dentro del trozo que suena, basta con mover el audio
+  if (state.current && keepPlaying && i >= state.current.start && i < state.current.end && audio.duration) {
+    const c = state.current;
+    audio.currentTime = chunkFracOf(c, i - c.start) * audio.duration; highlight(i, true); return;
+  }
+  state.token++; state.current = null; cancelPrefetch();
+  audio.pause();
+  highlight(i, true);
+  if (keepPlaying) play(); else { state.playing = false; setLoading(false); setPlayIcon(); }
+}
+function jumpChapter(ch, keepPlaying = state.playing) {
+  if (ch < 0 || ch >= state.chapters.length) return;
+  state.token++; state.current = null; cancelPrefetch(); audio.pause();
+  loadChapter(ch, 0); $('textScroll').scrollTop = 0;
+  if (keepPlaying) play(); else { state.playing = false; setPlayIcon(); }
+}
+function onChapterFinished() {
+  if (timer.mode === 'chapter') { timer.clear(); pause(); setStatus('Temporizador: fin del capítulo'); return true; }
+  if (state.meta) { deletePrepared(state.meta.id + '|' + state.ch + '|'); setTimeout(() => prepareVoice(false), 2000); } // ya escuchado: liberar espacio y seguir guardando
+  if (state.ch < state.chapters.length - 1) { loadChapter(state.ch + 1, 0); $('textScroll').scrollTop = 0; return false; }
+  state.playing = false; setPlayIcon(); setStatus('Has terminado el libro 🎉'); bgSound.stop(); return true;
+}
+$('textInner').addEventListener('click', e => { const sp = e.target.closest('.s'); if (sp) jumpTo(+sp.dataset.i); });
+$('seek').addEventListener('input', () => { const i = +$('seek').value; $('seek').style.setProperty('--p', (i / Math.max(1, state.sentences.length - 1) * 100) + '%'); });
+$('seek').addEventListener('change', () => jumpTo(+$('seek').value));
+$('back').onclick = () => skip(-1);
+$('fwd').onclick = () => skip(1);
+function skip(dir) {
+  // ~15 segundos ≈ 220 caracteres
+  let i = state.s, chars = 0;
+  if (dir < 0) { while (i > 0 && chars < 200) { i--; chars += state.sentences[i].t.length; } }
+  else { while (i < state.sentences.length - 1 && chars < 200) { chars += state.sentences[i].t.length; i++; } }
+  jumpTo(i);
+}
+$('prevCh').onclick = () => { if (state.s > 3) jumpTo(0); else jumpChapter(state.ch - 1); };
+$('nextCh').onclick = () => jumpChapter(state.ch + 1);
+
+/* ================= VOZ NATURAL (se genera en el propio móvil) ================= */
+const audioMem = new Map(); // promesas en memoria (precarga)
+function chunkAt(start) {
+  const first = start === state.s && !state.current;
+  if (start >= state.sentences.length) return null;
+  const g = gridChunkContaining(state.ch, start);
+  if (g.start === start && (!first || isPrepared(g) || isReadyMem(g))) return g;
+  // ya guardado o generado: se usa entero y se salta dentro del audio hasta la frase
+  if (isPrepared(g) || isReadyMem(g)) return Object.assign({}, g, { seekTo: start });
+  // sin guardar: al empezar, una sola frase para arrancar enseguida; luego hasta el final del trozo fijo
+  if (first && g.end - start > 1) return buildRange(state.sentences, start, start + 1, state.ch);
+  return buildRange(state.sentences, start, g.end, state.ch);
+}
+// la rejilla de trozos de un capítulo (siempre igual, se empiece donde se empiece)
+const gridCache = new Map();
+function gridOf(ch) {
+  const k = state.meta.id + '|' + ch;
+  if (!gridCache.has(k)) {
+    const S = ch === state.ch ? state.sentences : sentencesOfChapter(ch), g = [];
+    for (let i = 0; i < S.length;) { const c = buildChunk(S, i, ch, false); g.push(c); i = c.end; }
+    gridCache.set(k, g);
+    if (gridCache.size > 40) gridCache.delete(gridCache.keys().next().value);
+  }
+  return gridCache.get(k);
+}
+function gridChunkContaining(ch, i) { const g = gridOf(ch); for (const c of g) if (i < c.end) return c; return g[g.length - 1]; }
+function nextAfter(S, end, ch) {
+  if (end >= S.length) return null;
+  const g = gridChunkContaining(ch, end);
+  return g.start === end ? g : buildRange(S, end, g.end, ch);
+}
+function buildRange(S, start, endIdx, ch) {
+  let text = '', offsets = [], sents = [], pauses = [];
+  for (let end = start; end < endIdx; end++) {
+    const t = S[end].t;
+    offsets.push(text ? text.length + 1 : 0);
+    text = text ? text + ' ' + t : t; sents.push(t);
+    const nxt = S[end + 1];
+    pauses.push(!nxt ? 0.6 : nxt.p ? 0.55 : 0.22);
+  }
+  return { start, end: endIdx, text, offsets, sents, pauses, ch };
+}
+// --- audio guardado en el móvil (capítulos preparados)
+const PREP_LIMIT = 500e6; // hasta 500 MB de audio guardado
+const preparedKeys = new Set(), preparedSize = new Map();
+let preparedBytes = 0;
+db.keys('prepared').then(async ks => {
+  for (const k of ks || []) preparedKeys.add(k);
+  try { const recs = await db.all('prepared'); (ks || []).forEach((k, i) => { const sz = recs[i]?.blob?.size || 0; preparedSize.set(k, sz); preparedBytes += sz; }); } catch (e) {}
+}).catch(() => {});
+function isGridChunk(c) { const g = gridChunkContaining(c.ch, c.start); return g.start === c.start && g.end === c.end; }
+// todo lo que se genera se guarda en el móvil (si cabe), así sirve para esta noche y las siguientes
+// libera espacio borrando lo que ya no sirve: otros libros, otra voz y capítulos que quedaron atrás
+function makeRoom(need) {
+  if (!state.meta || preparedBytes + need <= PREP_LIMIT) return true;
+  const voice = voiceTag(), id = state.meta.id;
+  const score = k => { const [b, ch, , v] = k.split('|'); return b !== id ? 0 : v !== voice ? 1 : +ch < state.ch ? 2 : 9; };
+  const cands = [...preparedKeys].map(k => [score(k), k]).filter(x => x[0] < 9).sort((a, b) => a[0] - b[0]);
+  for (const [, k] of cands) {
+    if (preparedBytes + need <= PREP_LIMIT) break;
+    preparedKeys.delete(k); preparedBytes -= preparedSize.get(k) || 0; preparedSize.delete(k); db.del('prepared', k).catch(() => {});
+  }
+  return preparedBytes + need <= PREP_LIMIT;
+}
+async function persistChunk(c, b) {
+  if (!state.meta || !b || !b.size || !isGridChunk(c) || !makeRoom(b.size)) return;
+  const key = prepKey(c);
+  if (preparedKeys.has(key)) return;
+  try {
+    await db.put('prepared', { blob: b, marks: b.marks, dur: b.dur, book: state.meta.id, ch: c.ch }, key);
+    preparedKeys.add(key); preparedSize.set(key, b.size); preparedBytes += b.size;
+  } catch (e) { piper.logError('no se pudo guardar audio: ' + e.message); }
+}
+function prepKey(c) { return state.meta.id + '|' + c.ch + '|' + cacheKey(c); }
+function isPrepared(c) { return !!state.meta && preparedKeys.has(prepKey(c)); }
+function isReadyMem(c) { const p = audioMem.get(cacheKey(c)); return !!(p && p.ready); }
+function deletePrepared(prefix) {
+  for (const k of [...preparedKeys]) if (k.startsWith(prefix)) { preparedKeys.delete(k); preparedBytes -= preparedSize.get(k) || 0; preparedSize.delete(k); db.del('prepared', k).catch(() => {}); }
+}
+const nextChCache = { ch: -1, sents: null };
+function sentencesOfChapter(ch) {
+  if (nextChCache.ch !== ch) { nextChCache.ch = ch; nextChCache.sents = splitSentences(state.chapters[ch]); }
+  return nextChCache.sents;
+}
+function buildChunk(S, start, ch, first) {
+  if (start >= S.length) return null;
+  const limit = first ? 1 : 260; // primer trozo: una sola frase, para arrancar enseguida
+  let end = start, text = '', offsets = [], sents = [], pauses = [];
+  while (end < S.length) {
+    const t = S[end].t;
+    if (text && (text.length + t.length > limit)) break;
+    offsets.push(text ? text.length + 1 : 0);
+    text = text ? text + ' ' + t : t; sents.push(t);
+    const nxt = S[end + 1];
+    pauses.push(!nxt ? 0.6 : nxt.p ? 0.55 : 0.22);
+    end++;
+  }
+  return { start, end, text, offsets, sents, pauses, ch };
+}
+function piperVoice() { return PIPER_VOICES.find(v => v.id === settings.get('pVoice')) || PIPER_VOICES[0]; }
+function voiceLabel() { return 'Voz ' + piperVoice().label.split(' · ')[0].toLowerCase(); }
+function voiceTag() { return settings.get('pVoice') + (typeof dictTag === 'string' ? dictTag : ''); }
+function cacheKey(c) { return 'p|' + voiceTag() + '|' + c.text; }
+// silencio en WAV (para saltar un trozo que no se pudo generar)
+function silenceWav(sec, rate = 16000) {
+  const n = Math.round(sec * rate), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  return new Blob([buf], { type: 'audio/wav' });
+}
+
+/* ---------- generadores de voz (Piper, en segundo plano) ---------- */
+const PIPER_WORKER_SRC = `
+const ORT = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/';
+const GLUE = 'https://cdn.jsdelivr.net/npm/@diffusionstudio/vits-web@1.0.3/dist/piper-DeOu3H9E.js';
+const PW = 'https://cdn.jsdelivr.net/npm/@diffusionstudio/piper-wasm@1.0.0/build/piper_phonemize';
+let phon = null, phonOut = [], phonCalls = 0, phonAssets = null, session = null, sessionModel = null, cfg = null;
+const q = []; let busy = false;
+// El fonemizador acumula memoria y se rompe tras ~100 llamadas: se recrea antes
+// (cada 30 llamadas) reutilizando sus datos ya descargados, y al momento si falla.
+async function getPhon() {
+  if (phon && phonCalls < 30) return phon;
+  phon = null;
+  const g = await import(GLUE);
+  if (!phonAssets) {
+    const [w, d] = await Promise.all([fetch(PW + '.wasm').then(r => r.arrayBuffer()), fetch(PW + '.data').then(r => r.arrayBuffer())]);
+    phonAssets = { w, d };
+  }
+  phon = await g.createPiperPhonemize({
+    print: l => phonOut.push(l), printErr: () => {},
+    wasmBinary: phonAssets.w, getPreloadedPackage: () => phonAssets.d,
+    locateFile: f => f.endsWith('.wasm') ? PW + '.wasm' : f.endsWith('.data') ? PW + '.data' : f
+  });
+  phonCalls = 0;
+  return phon;
+}
+function phonRun(ph, list) {
+  phonOut = []; phonCalls++;
+  ph.callMain(['-l', cfg.espeak.voice, '--input', JSON.stringify(list.map(t => ({ text: t }))), '--espeak_data', '/espeak-ng-data']);
+  return phonOut.map(l => { try { return JSON.parse(l).phoneme_ids || []; } catch (e) { return []; } });
+}
+// todas las frases de un trozo en una sola llamada (una línea de salida por frase)
+async function phonemizeAll(sents) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const ph = await getPhon();
+      const res = phonRun(ph, sents);
+      if (res.length === sents.length) return res;
+      const one = []; // si no cuadra, frase a frase
+      for (const t of sents) { const r = phonRun(await getPhon(), [t]); one.push([].concat(...r)); }
+      return one;
+    } catch (e) { phon = null; }
+  }
+  throw new Error('el fonemizador falló');
+}
+function ensureOrt() {
+  if (self.ort) return;
+  importScripts(ORT + 'ort.wasm.min.js');
+  ort.env.wasm.wasmPaths = ORT; ort.env.wasm.numThreads = 1;
+}
+// al nacer el generador ya se descargan y arrancan ORT y el fonemizador, mientras llega el modelo
+let warmP = null;
+try { ensureOrt(); } catch (e) {}
+warmP = getPhon().catch(() => null);
+async function load(m) {
+  ensureOrt();
+  const phP = warmP ? warmP.then(p => p || getPhon()) : getPhon(); warmP = null; // en paralelo con el modelo
+  if (sessionModel !== m.model) {
+    if (session) { try { await session.release(); } catch (e) {} session = null; }
+    session = await ort.InferenceSession.create(new Uint8Array(m.bytes), { executionProviders: ['wasm'] });
+    sessionModel = m.model;
+  }
+  cfg = m.config;
+  await phP;
+  return { ok: true };
+}
+async function speak(m) {
+  const sr = cfg.audio.sample_rate, inf = cfg.inference || {};
+  const pitch = m.pitch || 1, outSr = Math.round(sr * pitch); // cambio de tono sin cambiar la velocidad
+  const sidMap = cfg.speaker_id_map || {};
+  const useSid = session.inputNames.includes('sid');
+  const sid = useSid ? (sidMap[m.speaker] ?? 0) : 0;
+  const parts = [], marks = []; let total = 0;
+  const allIds = await phonemizeAll(m.sentences);
+  for (let i = 0; i < m.sentences.length; i++) {
+    const ids = allIds[i] || [];
+    marks.push(total);
+    if (ids.length) {
+      const feeds = {
+        input: new ort.Tensor('int64', BigInt64Array.from(ids, BigInt), [1, ids.length]),
+        input_lengths: new ort.Tensor('int64', BigInt64Array.from([BigInt(ids.length)]), [1]),
+        scales: new ort.Tensor('float32', Float32Array.from([inf.noise_scale ?? 0.667, (inf.length_scale ?? 1) * pitch, inf.noise_w ?? 0.8]), [3])
+      };
+      if (useSid) feeds.sid = new ort.Tensor('int64', BigInt64Array.from([BigInt(sid)]), [1]);
+      const out = await session.run(feeds);
+      const a = out[session.outputNames[0]].data;
+      parts.push(a); total += a.length;
+    }
+    const gap = Math.round(sr * (m.pauses[i] ?? 0.22));
+    parts.push(new Float32Array(gap)); total += gap;
+  }
+  const buf = new ArrayBuffer(44 + total * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + total * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, outSr, true); v.setUint32(28, outSr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, total * 2, true);
+  let o = 44;
+  for (const a of parts) for (let k = 0; k < a.length; k++) { const x = Math.max(-1, Math.min(1, a[k])); v.setInt16(o, x < 0 ? x * 32768 : x * 32767, true); o += 2; }
+  return { wav: buf, sr: outSr, marks: marks.map(x => x / Math.max(1, total)) };
+}
+async function pump() {
+  if (busy) return; busy = true;
+  while (q.length) {
+    const m = q.shift();
+    try { const r = m.type === 'load' ? await load(m) : await speak(m); r.id = m.id; postMessage(r, r.wav ? [r.wav] : []); }
+    catch (err) { postMessage({ id: m.id, error: String((err && err.message) || err) }); }
+  }
+  busy = false;
+}
+onmessage = e => {
+  const m = e.data;
+  if (m.type === 'ping') { postMessage({ id: m.id, pong: true }); return; }
+  if (m.type === 'cancel') { for (const x of q.splice(0)) postMessage({ id: x.id, cancelled: true }); return; }
+  q.push(m); pump();
+};
+`;
+const piper = {
+  workers: [], seq: 0, pending: new Map(), loadedModel: null, loading: null, rtf: null,
+  // Cola propia: cada generador recibe UN trozo cada vez, por orden de prioridad
+  // (0 = lo que hay que leer ya, 1 = reserva, 2 = guardar capítulos).
+  queue: [], qseq: 0, lastReset: 0,
+  // varios núcleos: cada worker genera fragmentos distintos a la vez
+  errors: [], // últimos fallos, para el diagnóstico
+  loadTimeout: 150000,
+  poolSize(voice) {
+    if (voice && voice.mb > 40) return (navigator.deviceMemory || 4) >= 8 && (navigator.hardwareConcurrency || 2) >= 8 ? 2 : 1; // voces pesadas: dos generadores solo en móviles muy holgados
+    // Dos generadores solo en móviles con mucha memoria: en el resto, el navegador
+    // puede quedarse sin memoria y cerrar la página.
+    const cores = navigator.hardwareConcurrency || 2, mem = navigator.deviceMemory || 4;
+    return mem >= 6 && cores >= 6 ? 2 : 1;
+  },
+  logError(msg) { this.errors.push(new Date().toLocaleTimeString() + ' · ' + msg); if (this.errors.length > 8) this.errors.shift(); },
+  reset() {
+    this.lastReset = Date.now();
+    for (const w of this.workers) { try { w.terminate(); } catch (e) {} }
+    for (const p of this.pending.values()) p.rej(new Error('reinicio'));
+    this.pending.clear(); this.workers = []; this.loadedModel = null; this.loading = null;
+  },
+  killWorker(w) {
+    try { w.terminate(); } catch (e) {}
+    for (const [id, p] of this.pending) if (p.w === w) { this.pending.delete(id); p.rej(new Error('timeout')); }
+    this.workers = this.workers.filter(x => x !== w);
+    if (!this.workers.length) this.loadedModel = null;
+    this.logError('generador sin respuesta: reiniciado');
+    // si uno se congeló, lo normal es que los demás también: comprobarlos ya y reponer los que falten
+    setTimeout(() => { this.healthCheck(); const v = piperVoice(); this.ensure(v).then(() => this.dispatch()).catch(() => {}); }, 0);
+  },
+  // Android congela los generadores cuando el móvil duerme: al volver, comprobar que responden
+  lastCheck: 0,
+  async healthCheck() {
+    if (Date.now() - this.lastCheck < 3000) return;
+    this.lastCheck = Date.now();
+    // un generador ocupado no contesta hasta acabar su trozo: se le da el tiempo que necesita ese trozo
+    // (antes se descartaban generadores sanos que solo estaban trabajando)
+    await Promise.all(this.workers.filter(w => w.isReady).map(w => {
+      const wait = w.busy ? Math.max(5000, w.jobT0 + w.jobExp * 2 + 5000 - Date.now()) : 5000;
+      return this.call(w, { type: 'ping' }, null, wait).catch(() => {});
+    }));
+    this.dispatch();
+  },
+  enqueue(msg, ref) {
+    return new Promise((res, rej) => { this.queue.push({ msg, ref: ref || { prio: 1 }, res, rej, seq: ++this.qseq }); this.dispatch(); });
+  },
+  dispatch() {
+    for (const w of this.workers) {
+      if (w.busy || !w.isReady) continue;
+      if (!this.queue.length) return;
+      this.queue.sort((a, b) => a.ref.prio - b.ref.prio || a.seq - b.seq);
+      const job = this.queue.shift();
+      w.busy = true;
+      const t0 = performance.now();
+      // lo que debería tardar este trozo según lo rápido que va el móvil (≈65 ms de voz por letra)
+      const chars = (job.msg.sentences || []).join(' ').length;
+      w.jobT0 = Date.now(); w.jobExp = chars * 65 * Math.max(0.3, this.rtf || 1);
+      // plazo: holgado, pero sin esperar de más cuando el móvil va rápido (cuenta desde que empieza este trozo)
+      this.call(w, job.msg, null, Math.min(20000 + chars * 80, Math.max(12000, w.jobExp * 4 + 8000))).then(
+        r => { w.busy = false; r.ms = performance.now() - t0; job.res(r); this.dispatch(); },
+        e => { w.busy = false; job.rej(e); this.dispatch(); });
+    }
+  },
+  spawn() {
+    const w = new Worker(URL.createObjectURL(new Blob([PIPER_WORKER_SRC], { type: 'text/javascript' })));
+    w.jobs = 0;
+    w.onmessage = e => { const r = e.data, p = this.pending.get(r.id); if (!p) return; this.pending.delete(r.id); p.w.jobs--; if (r.error) p.rej(new Error(r.error)); else if (r.cancelled) p.rej(new Error('cancelled')); else p.res(r); };
+    w.onerror = e => {
+      const err = new Error('fallo del generador (' + (e.message || 'sin conexión') + ')');
+      for (const [id, p] of this.pending) if (p.w === w) { p.rej(err); this.pending.delete(id); }
+      this.workers = this.workers.filter(x => x !== w);
+      if (!this.workers.length) this.loadedModel = null;
+    };
+    return w;
+  },
+  call(w, msg, transfer, timeoutMs) {
+    const id = ++this.seq; msg.id = id; w.jobs++;
+    return new Promise((res, rej) => {
+      let t = 0;
+      const done = f => v => { clearTimeout(t); f(v); };
+      this.pending.set(id, { res: done(res), rej: done(rej), w });
+      if (timeoutMs) t = setTimeout(() => {
+        if (!this.pending.has(id)) return;
+        this.killWorker(w); // un generador colgado se descarta; se crea otro en el siguiente intento
+      }, timeoutMs);
+      w.postMessage(msg, transfer || []);
+    });
+  },
+  // al saltar a otra parte: se anula la reserva pendiente (no lo urgente ni el guardado de capítulos)
+  cancel() {
+    const keep = [];
+    for (const j of this.queue) { if (j.ref.prio === 1) j.rej(new Error('cancelled')); else keep.push(j); }
+    this.queue = keep;
+  },
+  async isDownloaded(model) { try { return !!(await db.get('models', model)); } catch (e) { return false; } },
+  dl: null, // { model, got, total, error, done }
+  dlPromise: null,
+  download(model, onProgress) {
+    if (this.dlPromise && this.dl && this.dl.model === model) return this.dlPromise;
+    const v = PIPER_VOICES.find(x => x.model === model) || {};
+    this.dl = { model, got: 0, total: (v.mb || 70) * 1e6, error: null, done: false };
+    const upd = () => { onProgress && onProgress(this.dl.got, this.dl.total); renderDownload(); };
+    upd();
+    this.dlPromise = (async () => {
+      let lastErr;
+      for (const base of PIPER_HF) {
+        const ctrl = new AbortController(); let stall;
+        const arm = () => { clearTimeout(stall); stall = setTimeout(() => ctrl.abort(), 25000); };
+        try {
+          const url = base + piperPath(model);
+          arm();
+          const cfgR = await fetch(url + '.json', { signal: ctrl.signal }); if (!cfgR.ok) throw new Error('error ' + cfgR.status + ' del servidor');
+          const config = await cfgR.json();
+          arm();
+          const r = await fetch(url, { signal: ctrl.signal }); if (!r.ok || !r.body) throw new Error('error ' + r.status + ' del servidor');
+          const len = +(r.headers.get('Content-Length') || 0); if (len) this.dl.total = len;
+          const reader = r.body.getReader(), chunks = []; this.dl.got = 0; let last = 0;
+          for (;;) {
+            arm();
+            const { done, value } = await reader.read(); if (done) break;
+            chunks.push(value); this.dl.got += value.length;
+            if (Date.now() - last > 300) { last = Date.now(); upd(); }
+          }
+          clearTimeout(stall);
+          const blob = new Blob(chunks);
+          if (blob.size < 1e6 || (len && blob.size < len)) throw new Error('la descarga llegó incompleta');
+          this.dl.got = blob.size; this.dl.total = blob.size; upd();
+          try { await db.put('models', { blob, config }, model); }
+          catch (e) { throw new Error('no hay espacio libre en el móvil para guardarla'); }
+          const check = await db.get('models', model);
+          if (!check) throw new Error('el navegador no ha dejado guardarla');
+          this.dl.done = true; upd();
+          return;
+        } catch (e) { clearTimeout(stall); lastErr = e.name === 'AbortError' ? new Error('la descarga se quedó parada (¿se cortó la conexión?)') : e; }
+      }
+      const raw = lastErr?.message || 'sin conexión';
+      const net = /Failed to fetch|NetworkError|Load failed|network/i.test(raw);
+      this.dl.error = inPreview ? 'La vista previa bloquea Internet. Descarga el archivo y ábrelo con Chrome.'
+        : net ? `El navegador bloqueó la conexión con el servidor de voces (${raw}). Si abriste el archivo desde otra app, ábrelo directamente con Chrome.`
+        : 'No se pudo descargar: ' + raw + '. Inténtalo de nuevo con wifi.';
+      upd();
+      throw new Error(this.dl.error);
+    })();
+    this.dlPromise.finally(() => { this.dlPromise = null; }).catch(() => {});
+    return this.dlPromise;
+  },
+  async ensure(voice, onStatus) {
+    if (this.loadedModel === voice.model && this.workers.length) { this.topUp(voice); return; }
+    if (this.loading) { await this.loading.catch(() => {}); if (this.loadedModel === voice.model) return; }
+    this.loading = (async () => {
+      let rec = await db.get('models', voice.model).catch(() => null);
+      if (!rec) {
+        await this.download(voice.model, (g, t) => onStatus && onStatus(`Descargando voz… ${Math.min(99, Math.round(g / t * 100))}% (solo la primera vez)`));
+        rec = await db.get('models', voice.model);
+        if (!rec) throw new Error('No hay espacio para guardar la voz en el móvil.');
+      }
+      const t0 = Date.now();
+      onStatus && onStatus('Preparando la voz…');
+      const tick = setInterval(() => onStatus && onStatus(`Preparando la voz… ${Math.round((Date.now() - t0) / 1000)} s`), 1000);
+      try {
+        if (this.loadedModel !== voice.model && this.workers.length) {
+          for (const w of this.workers) { try { w.terminate(); } catch (e) {} }
+          for (const [id, p] of this.pending) { p.rej(new Error('reinicio')); this.pending.delete(id); }
+          this.workers = [];
+        }
+        while (this.workers.length < this.poolSize(voice)) this.workers.push(this.spawn());
+        // el modelo se pasa al generador sin copiarlo (transferido), uno detrás de otro, para no llenar la memoria
+        const [first, ...rest] = this.workers;
+        const bytes = await rec.blob.arrayBuffer();
+        try {
+          await this.call(first, { type: 'load', model: voice.model, bytes, config: rec.config }, [bytes], this.loadTimeout);
+        } catch (e) {
+          this.reset();
+          throw new Error(voice.mb > 40 ? 'heavy-failed' : 'La voz no ha podido cargarse (' + e.message + '). Cierra otras apps y vuelve a intentarlo.');
+        }
+        first.isReady = true;
+        this.loadedModel = voice.model;
+        this.dispatch();
+        for (const w of rest) {
+          rec.blob.arrayBuffer()
+            .then(b => this.call(w, { type: 'load', model: voice.model, bytes: b, config: rec.config }, [b], this.loadTimeout))
+            .then(() => { w.isReady = true; this.dispatch(); })
+            .catch(() => { try { w.terminate(); } catch (e) {} this.workers = this.workers.filter(x => x !== w); });
+        }
+      } finally { clearInterval(tick); }
+    })();
+    try { await this.loading; } finally { this.loading = null; }
+  },
+  // vuelve a crear en segundo plano los generadores que se hayan perdido
+  topUp(voice) {
+    if (this.toppingUp || this.workers.length >= this.poolSize(voice)) return;
+    this.toppingUp = true;
+    db.get('models', voice.model).then(async rec => {
+      while (rec && this.loadedModel === voice.model && this.workers.length < this.poolSize(voice)) {
+        const w = this.spawn(); this.workers.push(w);
+        const b = await rec.blob.arrayBuffer();
+        try { await this.call(w, { type: 'load', model: voice.model, bytes: b, config: rec.config }, [b], this.loadTimeout); w.isReady = true; this.dispatch(); }
+        catch (e) { try { w.terminate(); } catch (e2) {} this.workers = this.workers.filter(x => x !== w); break; }
+      }
+    }).catch(() => {}).finally(() => { this.toppingUp = false; });
+  },
+  async speak(c, voice, ref) {
+    if (!this.workers.length) throw new Error('La voz neural no está preparada.');
+    const r = await this.enqueue({ type: 'speak', sentences: c.sents.map(applyDict), pauses: c.pauses, speaker: voice.speaker, pitch: voice.pitch || 1 }, ref);
+    const secs = (r.wav.byteLength - 44) / 2 / (r.sr || 22050);
+    if (secs > 1) {
+      const f = r.ms / 1000 / secs; this.rtf = this.rtf == null ? f : this.rtf * 0.7 + f * 0.3;
+      if (!this.warned && this.rtf / Math.max(1, this.workers.length) > 1.1 && state.playing) {
+        this.warned = true;
+        toast(voice.mb > 40 ? 'Tu móvil va justo con esta voz. Si se para, cambia en Ajustes a la voz de hombre (rápida).' : 'Tu móvil va justo. Si se para, baja la velocidad o cierra otras apps.', 7000);
+      }
+    }
+    const blob = new Blob([r.wav], { type: 'audio/wav' }); blob.marks = r.marks; blob.dur = secs; return blob;
+  }
+};
+
+/* ---------- caché y bucle de reproducción ---------- */
+function getAudio(c, prio = 1) {
+  const k = cacheKey(c);
+  if (audioMem.has(k)) { const old = audioMem.get(k); if (old.ref && prio < old.ref.prio) { old.ref.prio = prio; piper.dispatch(); } return old; }
+  const ref = { prio };
+  const p = (async () => {
+    {
+      if (isPrepared(c)) {
+        const pk = prepKey(c);
+        const rec = await db.get('prepared', pk).catch(() => null);
+        if (rec && rec.blob) { const b = rec.blob; b.marks = rec.marks; b.dur = rec.dur; return b; }
+        preparedKeys.delete(pk);
+      }
+      for (let attempt = 0, restarts = 0; attempt < 3; attempt++) {
+        const v = piperVoice();
+        try {
+          await piper.ensure(v, msg => { if (state.playing) setStatus(msg); });
+          const b = await piper.speak(c, v, ref);
+          persistChunk(c, b);
+          return b;
+        } catch (e) {
+          if (e.message === 'cancelled') throw e;
+          if (e.message === 'heavy-failed') {
+            piper.logError('la voz pesada no cargó: cambio a la de hombre');
+            settings.set('pVoice', 'carlfm'); $('pVoice').value = 'carlfm'; refreshSettingsUI();
+            toast('Tu móvil no ha podido cargar esa voz. He cambiado a la voz de hombre (rápida) para que puedas escuchar.', 7000);
+            attempt--; continue;
+          }
+          if (/descarg|espacio|vista previa|bloque/i.test(e.message)) throw e; // problemas de descarga: avisar
+          // un reinicio provocado por otro trozo no cuenta como fallo de este
+          if (e.message === 'reinicio' && restarts++ < 4) { attempt--; continue; }
+          piper.logError(e.message + ' (intento ' + (attempt + 1) + ')');
+          // reiniciar todo solo si un generador se colgó, y como mucho una vez cada 30 s
+          if (attempt === 1 && /timeout|generador/.test(e.message) && Date.now() - piper.lastReset > 30000) piper.reset();
+        }
+      }
+      // no se pudo generar este trozo: medio segundo de silencio y seguimos leyendo
+      piper.logError('trozo saltado: «' + c.text.slice(0, 40) + '…»');
+      toast('No se pudo generar una frase; se ha saltado.');
+      const sil = silenceWav(0.5);
+      sil.marks = c.sents.map((_, i) => i / c.sents.length); sil.dur = 0.5; return sil;
+    }
+  })();
+  audioMem.set(k, p);
+  p.ref = ref;
+  p.ready = false;
+  p.then(b => { p.ready = true; p.dur = b.dur || 0; }, () => audioMem.delete(k));
+  if (audioMem.size > 50) audioMem.delete(audioMem.keys().next().value);
+  return p;
+}
+// va generando por detrás varios trozos, también del capítulo siguiente
+const AHEAD_TARGET = 600; // ~10 min en memoria; el resto se va guardando en el móvil
+function upcomingChunks(c, maxSecs) {
+  const out = []; let n = c, S = state.sentences, ch = state.ch, secs = 0;
+  while (secs < maxSecs && out.length < 100) {
+    let nx = nextAfter(S, n.end, ch);
+    if (!nx) { if (ch + 1 >= state.chapters.length) break; ch++; S = sentencesOfChapter(ch); nx = nextAfter(S, 0, ch); if (!nx) break; }
+    out.push(nx); secs += nx.text.length / CHARS_PER_SEC; n = nx;
+  }
+  return out;
+}
+function prefetchFrom(c) {
+  const list = upcomingChunks(c, AHEAD_TARGET);
+  const keep = new Set([cacheKey(c), ...list.map(cacheKey)]);
+  for (const k of [...audioMem.keys()]) if (k.startsWith('p|') && !keep.has(k)) audioMem.delete(k);
+  for (const n of list) getAudio(n).catch(() => {});
+}
+// segundos de audio ya generados justo a continuación de c (sin huecos)
+function readyAhead(c) {
+  let secs = 0;
+  for (const n of upcomingChunks(c, AHEAD_TARGET)) { const p = audioMem.get(cacheKey(n)); if (!p || !p.ready) break; secs += p.dur || 0; }
+  return secs;
+}
+function cancelPrefetch() { piper.cancel(); for (const [k, p] of audioMem) if (k.startsWith('p|')) audioMem.delete(k); }
+
+/* --- botón «Preparar voz»: genera ~10 minutos antes de darle a ▶ --- */
+const PREP_SECS = 600;
+const prep = { token: 0, active: false };
+function prepChip(t) { $('voiceChip').textContent = t; }
+function prepReset() { if (prep.active) { prep.token++; prep.active = false; } releasePrepLock(); refreshPrepChip(); }
+function readyFrom(c) { const p = audioMem.get(cacheKey(c)); return p && p.ready ? (p.dur || 0) + readyAhead(c) : 0; }
+// capítulos guardados por delante (completos) a partir del actual
+function savedChaptersAhead() {
+  if (!state.meta) return 0;
+  let n = 0;
+  for (let ch = state.ch; ch < state.chapters.length && n < 50; ch++) {
+    const from = ch === state.ch ? gridChunkContaining(ch, state.s).start : 0;
+    if (gridOf(ch).every(g => g.end <= from || isPrepared(g))) n++; else break;
+  }
+  return n;
+}
+function refreshPrepChip() {
+  if (!state.meta) { prepChip('💾 Guardar capítulos'); return; }
+  const n = savedChaptersAhead(), mb = Math.round(preparedBytes / 1e6);
+  if (prep.active) prepChip(`💾 ${n} cap. · ${mb} MB`);
+  else prepChip(n ? `✓ ${n} cap. guardados` : '💾 Guardar capítulos');
+}
+let prepLock = null;
+async function holdPrepLock() { try { prepLock = await navigator.wakeLock?.request('screen'); } catch (e) {} }
+function releasePrepLock() { try { prepLock?.release(); } catch (e) {} prepLock = null; }
+// manual = pulsado el botón (avisa y mantiene la pantalla encendida); si no, arranca solo al escuchar
+async function prepareVoice(manual = true) {
+  if (!state.meta) return;
+  if (prep.active) { if (manual) toast('Ya se está guardando por detrás. Puedes escuchar mientras tanto.'); return; }
+  const tk = ++prep.token; prep.active = true;
+  const bookId = state.meta.id;
+  try {
+    refreshPrepChip();
+    await piper.ensure(piperVoice(), msg => { if (manual && !state.playing) setStatus(msg); });
+    if (tk !== prep.token) return;
+    if (manual) { holdPrepLock(); toast('Guardando capítulos por delante (hasta 500 MB). Puedes escuchar mientras tanto.', 6000); }
+    let full = false;
+    outer:
+    for (let ch = state.ch; ch < state.chapters.length; ch++) {
+      for (const g of gridOf(ch)) {
+        if (tk !== prep.token || state.meta?.id !== bookId) return;
+        if (ch === state.ch && g.end <= gridChunkContaining(ch, state.s).start) continue;
+        if (isPrepared(g)) continue;
+        if (!makeRoom(2e6)) { full = true; break outer; }
+        for (let attempt = 0; attempt < 3 && !isPrepared(g); attempt++) {
+          try { const b = await getAudio(g, 2); await persistChunk(g, b); } catch (e) { if (e.message !== 'cancelled') piper.logError('guardar: ' + e.message); }
+          if (tk !== prep.token) return;
+        }
+        refreshPrepChip();
+        if (manual && !state.playing) setStatus(`Guardando capítulos… ${savedChaptersAhead()} listos · ${Math.round(preparedBytes / 1e6)} MB`);
+      }
+    }
+    prep.active = false; refreshPrepChip();
+    if (manual || !state.playing) toast(full ? `✓ Guardados ${savedChaptersAhead()} capítulos (500 MB). Seguirá cuando escuches y se libere sitio.` : '✓ Guardado hasta el final del libro.', 6000);
+  } catch (e) {
+    if (tk === prep.token && e.message !== 'cancelled') toast(e.message, 6000);
+  } finally { if (tk === prep.token) { prep.active = false; releasePrepLock(); refreshPrepChip(); } }
+}
+let currentUrl = null;
+async function audioStart(from) {
+  const token = ++state.token;
+  state.current = null;
+  let start = from, playErrs = 0;
+  while (state.playing && token === state.token) {
+    let c = chunkAt(start);
+    if (!c) { if (onChapterFinished()) return; start = 0; continue; }
+    const p0 = getAudio(c, 0);
+    const stalled = !p0.ready;
+    setLoading(true);
+    if (stalled) setStatus(state.current ? 'Preparando más voz… (el móvil va más lento que la lectura)' : 'Generando voz en el móvil…');
+    let blob;
+    try {
+      blob = await p0;
+      {
+        prefetchFrom(c);
+        // Antes de empezar (o tras un parón) acumular un colchón para no ir a trompicones.
+        // Si el móvil genera mucho más rápido de lo que se lee, no hace falta esperar.
+        const fast = piper.rtf != null && piper.rtf / Math.max(1, piper.workers.length) < 0.4;
+        const need = state.current && stalled && !fast ? 15 : 0; // al dar a ▶, o si el móvil va sobrado, sigue ya, sin esperas
+        if (need && readyAhead(c) < need) {
+          const t0 = Date.now();
+          for (const n of upcomingChunks(c, need + 30)) {
+            if (token !== state.token) return;
+            setStatus(`Preparando voz… ${Math.round(readyAhead(c))} de ${need} s`);
+            await getAudio(n).catch(() => {});
+            if (readyAhead(c) >= need || Date.now() - t0 > 90000) break;
+            if (Date.now() - t0 > 12000 && !c.checked) { c.checked = true; piper.healthCheck(); }
+          }
+        }
+      }
+    } catch (e) {
+      if (token !== state.token || e.message === 'cancelled') return;
+      state.playing = false; setLoading(false); setStatus(e.message, true); toast(e.message, 6000); return;
+    }
+    if (token !== state.token || !state.playing) return;
+    // precargar lo siguiente para no quedarnos sin audio
+    prefetchFrom(c);
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(blob);
+    c.marks = blob.marks || null;
+    state.current = c;
+    audio.src = currentUrl; audio.playbackRate = settings.get('speed'); audio.preservesPitch = true;
+    if (c.seekTo > c.start) {
+      await new Promise(r => { if (audio.readyState >= 1) r(); else { audio.addEventListener('loadedmetadata', r, { once: true }); audio.addEventListener('error', r, { once: true }); } });
+      try { audio.currentTime = chunkFracOf(c, c.seekTo - c.start) * audio.duration; } catch (e) {}
+      if (token !== state.token) return;
+    }
+    highlight(c.seekTo || c.start);
+    setLoading(false); setStatus(voiceLabel());
+    const ended = new Promise(res => { audio.onended = () => res('end'); audio.onerror = () => res('error'); });
+    try { await audio.play(); }
+    catch (e) {
+      if (token !== state.token) return;
+      // con la pantalla apagada el navegador a veces se niega: se reintenta al volver
+      if (document.hidden) {
+        await new Promise(r => document.addEventListener('visibilitychange', function f() { if (!document.hidden) { document.removeEventListener('visibilitychange', f); r(); } }));
+        if (token !== state.token) return;
+        try { await audio.play(); } catch (e2) { playFailed(e2); return; }
+      } else { playFailed(e); return; }
+    }
+    const how = await ended;
+    if (token !== state.token) return;
+    if (how === 'error') {
+      piper.logError('el navegador no pudo reproducir un trozo');
+      audioMem.delete(cacheKey(c));
+      if (++playErrs > 2) { playErrs = 0; start = c.end; if (start >= state.sentences.length) { if (onChapterFinished()) return; start = 0; } }
+      continue; // se vuelve a generar y se reintenta
+    }
+    playErrs = 0;
+    start = c.end;
+    if (start >= state.sentences.length) { if (onChapterFinished()) return; start = 0; }
+  }
+}
+function chunkFracOf(c, k) { return c.marks ? c.marks[k] : c.offsets[k] / c.text.length; }
+let lastBufUi = 0;
+audio.addEventListener('timeupdate', () => {
+  timer.tick();
+  const c = state.current; if (!c || !audio.duration) return;
+  if (Date.now() - lastBufUi > 1500 && !state.loading) {
+    lastBufUi = Date.now();
+    const ahead = readyAhead(c) + (audio.duration - audio.currentTime);
+    setStatus(voiceLabel() + ' · ' + fmtClock(ahead / settings.get('speed')) + ' preparados');
+  }
+  const f = audio.currentTime / audio.duration;
+  let k = 0; while (k + 1 < c.offsets.length && chunkFracOf(c, k + 1) <= f) k++;
+  const i = c.start + k; if (i !== state.s) highlight(i);
+  updatePositionState();
+});
+audio.addEventListener('pause', () => { if (state.playing && !audio.ended && !state.loading && audio.currentTime > 0 && document.hidden === false) { /* pausa del sistema (llamada, auriculares) */ state.playing = false; setPlayIcon(); setStatus('En pausa'); saveMeta(true); } });
+audio.addEventListener('play', () => { if (!state.playing) { state.playing = true; setPlayIcon(); setStatus(voiceLabel()); } });
+
+/* ================= TEMPORIZADOR ================= */
+const timer = {
+  mode: null, end: 0, iv: 0, choice: 0, fading: false,
+  // v: minutos, 'chapter' o 0. Se recuerda la elección para las siguientes noches.
+  // Cuenta solo el tiempo en que de verdad suena la voz: si está cargando o en pausa, no descuenta.
+  left: 0, last: 0,
+  set(v, remember = true) {
+    this.clear();
+    this.choice = v;
+    if (remember) settings.set('lastTimer', v);
+    if (v === 'chapter') { this.mode = 'chapter'; }
+    else if (v) { this.mode = 'time'; this.left = v * 60; this.last = Date.now(); this.iv = setInterval(() => this.tick(), 1000); }
+    this.render();
+  },
+  clear() { clearInterval(this.iv); this.mode = null; this.render(); },
+  // también se comprueba con el avance del audio: con la pantalla apagada los relojes de la página van con retraso
+  tick() {
+    if (this.mode !== 'time') return;
+    const now = Date.now(), dt = Math.min(5, (now - this.last) / 1000); this.last = now;
+    const sounding = state.playing && !state.loading && !audio.paused && !audio.ended;
+    if (sounding) this.left -= dt;
+    if (sounding && this.left <= 60 && this.left + dt > 60) dipVolume(0.35, 1500); // aviso: queda un minuto
+    if (this.left <= 0) { this.clear(); this.endedAt = Date.now(); fadeAndPause(); return; }
+    this.render(this.left);
+  },
+  render(left) {
+    const chip = $('timerChip');
+    chip.classList.toggle('active', !!this.mode);
+    $('timerTxt').textContent = this.mode === 'chapter' ? 'Fin del capítulo' : this.mode === 'time' ? fmtClock(left ?? this.left) : 'Temporizador';
+  }
+};
+async function fadeAndPause() {
+  if (timer.fading) return; timer.fading = true;
+  // baja el volumen poco a poco durante unos 10 segundos
+  if (!audio.paused) { for (let v = 1; v > 0; v -= 0.05) { audio.volume = Math.max(0, v); bgSound.duck(v); await sleep(500); if (!state.playing) break; } }
+  pause(); audio.volume = 1; bgSound.duck(1); timer.fading = false;
+  rewindAfterSleep();
+  const mins = +(settings.get('rewindMin') ?? 2);
+  setStatus('Temporizador terminado · buenas noches' + (mins ? ` · retrocedido ${mins} min` : ''));
+}
+function renderTimerList() {
+  const opts = [[0, 'Desactivado'], [10, '10 minutos'], [15, '15 minutos'], [20, '20 minutos'], [30, '30 minutos'], [45, '45 minutos'], [60, '1 hora'], ['chapter', 'Al terminar el capítulo']];
+  $('timerList').innerHTML = opts.map(([v, l]) => `<button class="opt${(timer.mode && String(timer.choice) === String(v)) || (!timer.mode && v === 0) ? ' on' : ''}" data-t="${v}">${l}</button>`).join('');
+}
+$('timerList').addEventListener('click', e => { const b = e.target.closest('[data-t]'); if (!b) return; const v = b.dataset.t; timer.set(v === 'chapter' ? 'chapter' : +v); closeSheets(); if (timer.mode) toast(v === 'chapter' ? 'Se pausará al acabar el capítulo.' : 'Se pausará en ' + b.textContent + '.'); });
+$('timerChip').onclick = () => { renderTimerList(); openSheet('timerSheet'); };
+
+/* ================= HOJAS / AJUSTES ================= */
+function openSheet(id) { closeSheets(true); $(id).classList.add('show'); $('scrim').classList.add('show'); }
+function closeSheets(silent) { document.querySelectorAll('.sheet.show').forEach(s => s.classList.remove('show')); if (!silent) $('scrim').classList.remove('show'); }
+$('scrim').onclick = () => closeSheets();
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeSheets());
+
+$('openChapters').onclick = () => {
+  const m = state.meta; if (!m) return;
+  $('chapterList').innerHTML = m.chapterTitles.map((t, i) => `<button class="ch-item${i === state.ch ? ' cur' : ''}" data-ch="${i}"><span>${esc(t)}</span><small>${fmtDur(m.chapterLens[i] / CHARS_PER_SEC / settings.get('speed'))}</small></button>`).join('');
+  renderBookmarks();
+  openSheet('chaptersSheet');
+  const cur = $('chapterList').querySelector('.cur'); if (cur) cur.scrollIntoView({ block: 'center' });
+};
+$('chapterList').addEventListener('click', e => { const b = e.target.closest('[data-ch]'); if (!b) return; closeSheets(); jumpChapter(+b.dataset.ch); });
+
+function refreshSettingsUI() {
+  refreshPiperState();
+  $('speeds').innerHTML = SPEEDS.map(s => `<button data-sp="${s}" class="${s === settings.get('speed') ? 'on' : ''}">${String(s).replace('.', ',')}×</button>`).join('');
+  $('speedChip').textContent = String(settings.get('speed')).replace('.', ',') + '×';
+  refreshPrepChip();
+  $('fontVal').textContent = settings.get('font') + ' px';
+  document.documentElement.style.setProperty('--reader-size', settings.get('font') + 'px');
+}
+$('pVoice').innerHTML = PIPER_VOICES.map(v => `<option value="${v.id}">${v.label}</option>`).join('');
+$('pVoice').value = piperVoice().id;
+const mb = x => (x / 1e6).toFixed(x < 1e7 ? 1 : 0);
+let piperOk = {};
+async function refreshPiperState() {
+  for (const v of PIPER_VOICES) piperOk[v.model] = await piper.isDownloaded(v.model);
+  [...$('pVoice').options].forEach(o => { const v = PIPER_VOICES.find(x => x.id === o.value); o.textContent = v.label + (piperOk[v.model] ? '  ✓' : ''); });
+  renderDownload();
+}
+function renderDiag() {
+  const el = $('piperDiag'); if (!el) return;
+  const c = state.current;
+  el.textContent = [
+    'Voz: ' + piperVoice().label,
+    'Generadores: ' + piper.workers.length + ' (núcleos ' + (navigator.hardwareConcurrency || '?') + ', memoria ' + (navigator.deviceMemory || '?') + ' GB)',
+    'Velocidad de generación: ' + (piper.rtf == null ? 'aún sin medir' : (piper.rtf / Math.max(1, piper.workers.length)).toFixed(2) + '× (menos de 1 = va bien)'),
+    'Audio preparado por delante: ' + (c ? Math.round(readyAhead(c)) + ' s' : '—'),
+    'Abierta en: ' + (inPreview ? 'vista previa (no funciona aquí)' : location.protocol),
+    'Errores: ' + (piper.errors.length ? '\n  ' + piper.errors.join('\n  ') : 'ninguno')
+  ].join('\n');
+}
+setInterval(() => { if ($('settingsSheet').classList.contains('show')) renderDiag(); }, 2000);
+// si se queda esperando más de 10 s, explicar el motivo en pantalla
+let waitSince = 0;
+function diagSummary() {
+  const rtf = piper.rtf == null ? null : piper.rtf / Math.max(1, piper.workers.length);
+  const c = state.current, lines = [];
+  if (rtf == null) lines.push('• Aún no ha terminado de generar ningún trozo: la voz está tardando en cargar.');
+  else if (rtf > 1) lines.push(`• Tu móvil genera la voz a ${rtf.toFixed(1)}× (más lento de lo que se lee). Por eso se para a esperar.`);
+  else lines.push(`• Velocidad de generación ${rtf.toFixed(2)}× (va bien).`);
+  lines.push('• Generadores activos: ' + piper.workers.length + ' · núcleos ' + (navigator.hardwareConcurrency || '?') + ' · memoria ' + (navigator.deviceMemory || '?') + ' GB');
+  lines.push('• Audio preparado: ' + (c ? Math.round(readyAhead(c)) + ' s' : '—') + ' · guardado: ' + Math.round(preparedBytes / 1e6) + ' MB');
+  lines.push('• Abierta desde: ' + (inPreview ? 'vista previa' : location.protocol.replace(':', '')) + (document.hidden ? ' · pantalla apagada' : ''));
+  if (piper.errors.length) lines.push('• Último error: ' + piper.errors[piper.errors.length - 1]);
+  return lines.join('<br>');
+}
+setInterval(() => {
+  const waiting = state.playing && state.loading;
+  if (!waiting) { waitSince = 0; $('diagBanner').classList.add('hidden'); return; }
+  if (!waitSince) waitSince = Date.now();
+  if (Date.now() - waitSince > 5000 && Date.now() - piper.lastCheck > 6000) piper.healthCheck();
+  if (Date.now() - waitSince > 10000) {
+    $('diagBanner').innerHTML = `<b>Lleva ${Math.round((Date.now() - waitSince) / 1000)} s esperando.</b> Haz una captura de este recuadro y mándasela a Claude:<br>` + diagSummary();
+    $('diagBanner').classList.remove('hidden');
+  }
+}, 1000);
+function renderDownload() {
+  renderDiag();
+  const v = piperVoice(), d = piper.dl && piper.dl.model === v.model ? piper.dl : null;
+  const box = $('dlBox'), txt = $('piperState'), bar = $('dlBar'), btn = $('dlPiper');
+  box.classList.remove('ok', 'err'); bar.classList.add('hidden'); btn.classList.remove('hidden'); btn.disabled = false;
+  if (d && !d.done && !d.error) {
+    const pct = Math.min(99, Math.round(d.got / d.total * 100));
+    txt.textContent = `Descargando… ${mb(d.got)} de ${mb(d.total)} MB (${pct}%). No cierres la app.`;
+    bar.classList.remove('hidden'); $('dlFill').style.width = pct + '%';
+    btn.disabled = true; btn.textContent = 'Descargando…';
+  } else if (d && d.error) {
+    box.classList.add('err'); txt.textContent = '✕ ' + d.error; btn.textContent = 'Reintentar';
+  } else if (piperOk[v.model] || (d && d.done)) {
+    box.classList.add('ok');
+    const r = piper.rtf != null && piper.loadedModel === v.model ? piper.rtf / piper.workers.length : null;
+    txt.textContent = '✓ Voz descargada y guardada en el móvil. Funciona sin Internet.' + (r == null ? '' : r < 0.8 ? ' Tu móvil la genera sin problemas.' : r < 1.1 ? ' Tu móvil va justo: si notas pausas, baja la velocidad o prueba Carlfm (rápida).' : ' Tu móvil va lento con esta voz: prueba Carlfm (rápida).');
+    btn.classList.add('hidden');
+  } else {
+    txt.textContent = `Esta voz aún no está en el móvil (≈ ${v.mb} MB). Pulsa «Descargar ahora», mejor con wifi.`; btn.textContent = 'Descargar ahora';
+  }
+}
+$('pVoice').onchange = () => { settings.set('pVoice', $('pVoice').value); prepReset(); refreshSettingsUI(); restartIfPlaying(); };
+$('dlPiper').onclick = async () => {
+  const v = piperVoice();
+  try { await piper.download(v.model); piperOk[v.model] = true; toast('✓ Voz descargada. Pulsa «Probar» para escucharla.', 5000); }
+  catch (e) { toast(e.message, 6000); }
+  refreshPiperState();
+};
+$('rmPiper').onclick = async () => {
+  if (!confirm('¿Borrar las voces neurales descargadas? Tendrás que volver a descargarlas.')) return;
+  stopAll(); await db.clear('models'); piper.loadedModel = null; refreshPiperState(); toast('Voces borradas.');
+};
+$('testPiper').onclick = async () => {
+  const b = $('testPiper'); b.disabled = true; b.textContent = '…';
+  try {
+    const v = piperVoice();
+    await piper.ensure(v, msg => { if (!/Descargando/.test(msg)) { $('piperState').textContent = msg; } });
+    refreshPiperState();
+    const blob = await piper.speak({ sents: ['Hola. Así sonará tu libro con esta voz.'], pauses: [0.2], text: 'Hola' }, v);
+    const a = new Audio(URL.createObjectURL(blob)); a.playbackRate = settings.get('speed'); await a.play();
+  } catch (e) { if (e.message !== 'cancelled') toast(e.message, 6000); }
+  b.disabled = false; b.textContent = 'Probar'; refreshPiperState();
+};
+$('pVoice').addEventListener('change', () => renderDownload());
+
+function restartIfPlaying() { if (state.playing) { const i = state.s; jumpTo(i, true); } }
+$('speeds').onclick = e => {
+  const b = e.target.closest('[data-sp]'); if (!b) return;
+  settings.set('speed', +b.dataset.sp); refreshSettingsUI(); updateProgressUI();
+  audio.playbackRate = settings.get('speed');
+};
+$('speedChip').onclick = () => {
+  const i = SPEEDS.indexOf(settings.get('speed')); settings.set('speed', SPEEDS[(i + 1) % SPEEDS.length]); refreshSettingsUI(); updateProgressUI();
+  audio.playbackRate = settings.get('speed');
+};
+$('voiceChip').onclick = () => prepareVoice();
+$('fontUp').onclick = () => { settings.set('font', Math.min(40, settings.get('font') + 1)); refreshSettingsUI(); };
+$('fontDown').onclick = () => { settings.set('font', Math.max(14, settings.get('font') - 1)); refreshSettingsUI(); };
+async function refreshCacheInfo() { try { const recs = await db.all('prepared'); const secs = recs.reduce((a, r) => a + (r.dur || 0), 0), mb = recs.reduce((a, r) => a + (r.blob?.size || 0), 0) / 1e6; $('cacheInfo').textContent = recs.length ? `${Math.round(secs / 60)} min de audio · ${mb.toFixed(0)} MB` : 'Nada guardado'; } catch (e) { $('cacheInfo').textContent = '—'; } }
+$('clearCache').onclick = async () => { await db.clear('prepared'); preparedKeys.clear(); audioMem.clear(); refreshCacheInfo(); refreshPrepChip(); toast('Audio guardado borrado.'); };
+function openSettings() { refreshSettingsUI(); refreshCacheInfo(); openSheet('settingsSheet'); }
+$('openSettings').onclick = openSettings;
+$('libSettings').onclick = openSettings;
+
+/* ================= PANTALLA DE BLOQUEO / AURICULARES ================= */
+let iconUrl = '';
+function makeIcon() {
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+    g.fillStyle = '#7b5a3c'; g.fillRect(0, 0, 512, 512);
+    g.strokeStyle = '#fff'; g.lineWidth = 28; g.lineJoin = g.lineCap = 'round';
+    g.beginPath(); g.moveTo(140, 150); g.quadraticCurveTo(140, 110, 180, 110); g.lineTo(380, 110); g.lineTo(380, 380); g.lineTo(180, 380); g.quadraticCurveTo(140, 380, 140, 420); g.closePath(); g.stroke();
+    g.beginPath(); g.moveTo(200, 180); g.lineTo(320, 180); g.moveTo(200, 240); g.lineTo(320, 240); g.stroke();
+    iconUrl = c.toDataURL('image/png');
+    $('appleIcon').href = iconUrl;
+    const manifest = { name: 'Voz y Página', short_name: 'Voz y Página', display: 'standalone', background_color: '#f3e9d2', theme_color: '#7b5a3c', start_url: location.href.split('#')[0], icons: [{ src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }] };
+    // en la web (GitHub) se usan manifest.json y sw.js de verdad: así se puede instalar y convertir en APK
+    if (/^https?:$/.test(location.protocol) && window.top === window.self) {
+      fetch('manifest.json', { method: 'HEAD' }).then(r => {
+        if (!r.ok) return;
+        const l = document.createElement('link'); l.rel = 'manifest'; l.href = 'manifest.json'; document.head.appendChild(l);
+        navigator.serviceWorker?.register('sw.js').catch(() => {});
+      }).catch(() => {});
+    } else {
+    const link = document.createElement('link'); link.rel = 'manifest'; link.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest)); document.head.appendChild(link);
+    }
+    const fav = document.createElement('link'); fav.rel = 'icon'; fav.href = iconUrl; document.head.appendChild(fav);
+  } catch (e) {}
+}
+makeIcon();
+function updateMediaMeta() {
+  if (!('mediaSession' in navigator) || !state.meta) return;
+  try { navigator.mediaSession.metadata = new MediaMetadata({ title: state.meta.chapterTitles[state.ch] || state.meta.title, artist: state.meta.author || 'Voz y Página', album: state.meta.title, artwork: iconUrl ? [{ src: iconUrl, sizes: '512x512', type: 'image/png' }] : [] }); } catch (e) {}
+}
+function updatePositionState() {
+  if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState || !audio.duration) return;
+  try { navigator.mediaSession.setPositionState({ duration: audio.duration, playbackRate: audio.playbackRate, position: Math.min(audio.currentTime, audio.duration) }); } catch (e) {}
+}
+if ('mediaSession' in navigator) {
+  const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) {} };
+  h('play', () => play()); h('pause', () => pause());
+  h('seekbackward', () => skip(-1)); h('seekforward', () => skip(1));
+  h('previoustrack', () => skip(-1)); h('nexttrack', () => skip(1));
+}
+
+/* ================= TEMAS Y AYUDAS DE LECTURA ================= */
+const THEMES = [
+  ['auto', 'Automático', 'Sepia de día, oscuro de noche', '#f3e9d2', '#4b3b2a'],
+  ['sepia', 'Sepia', 'Papel antiguo, suave', '#f3e9d2', '#4b3b2a'],
+  ['sepia-noche', 'Sepia noche', 'Marrón oscuro, para la cama', '#1e1913', '#e4d5bb'],
+  ['crema', 'Crema', 'Letra negra, contraste alto', '#fbf5e6', '#1c1a16'],
+  ['verde', 'Verde suave', 'Relaja la vista', '#e6efdf', '#24331f'],
+  ['gris-noche', 'Gris noche', 'Poco brillo', '#1b1c1d', '#c9c9c4'],
+  ['contraste', 'Blanco sobre negro', 'Máximo contraste', '#000000', '#ffffff'],
+  ['amarillo', 'Amarillo sobre negro', 'Para baja visión', '#000000', '#ffe066']
+];
+function applyReading() {
+  const h = document.documentElement, t = settings.get('theme') || 'auto';
+  if (t === 'auto') h.removeAttribute('data-theme'); else h.setAttribute('data-theme', t);
+  const f = settings.get('rfont') || 'libro';
+  h.setAttribute('data-font', f);
+  if (f === 'atkinson' && !document.getElementById('atkinsonCss')) {
+    const l = document.createElement('link'); l.id = 'atkinsonCss'; l.rel = 'stylesheet';
+    l.href = 'https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap'; document.head.appendChild(l);
+  }
+  h.style.setProperty('--reader-lh', settings.get('rlh') || '1.7');
+  h.style.setProperty('--reader-ls', settings.get('rls') || '0');
+  h.style.setProperty('--reader-fw', settings.get('rbold') ? '700' : '400');
+  h.setAttribute('data-big', settings.get('bigBtns') ? '1' : '0');
+  $('textInner').classList.toggle('focus', !!settings.get('focusMode'));
+  // color de la barra del sistema
+  const bg = getComputedStyle(h).getPropertyValue('--paper').trim();
+  document.querySelectorAll('meta[name=theme-color]').forEach(m => m.setAttribute('content', bg));
+  renderReadingUI();
+}
+function renderReadingUI() {
+  const t = settings.get('theme') || 'auto';
+  $('themeGrid').innerHTML = THEMES.map(([id, name, sub, bg, fg]) => `<button class="theme-btn${id === t ? ' on' : ''}" data-theme="${id}" style="background:${bg};color:${fg}">${name}<small>${sub}</small></button>`).join('');
+  const mark = (sel, attr, val) => document.querySelectorAll(sel + ' button').forEach(b => b.classList.toggle('on', b.dataset[attr] === val));
+  mark('#fontSeg', 'f', settings.get('rfont') || 'libro');
+  mark('#lhSeg', 'v', settings.get('rlh') || '1.6');
+  mark('#lsSeg', 'v', settings.get('rls') || '0');
+  $('optBold').classList.toggle('on', !!settings.get('rbold'));
+  $('optFocus').classList.toggle('on', !!settings.get('focusMode'));
+  $('optBig').classList.toggle('on', !!settings.get('bigBtns'));
+}
+$('themeGrid').onclick = e => { const b = e.target.closest('[data-theme]'); if (b) { settings.set('theme', b.dataset.theme); applyReading(); } };
+$('fontSeg').onclick = e => { const b = e.target.closest('[data-f]'); if (b) { settings.set('rfont', b.dataset.f); applyReading(); } };
+$('lhSeg').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { settings.set('rlh', b.dataset.v); applyReading(); } };
+$('lsSeg').onclick = e => { const b = e.target.closest('[data-v]'); if (b) { settings.set('rls', b.dataset.v); applyReading(); } };
+$('optBold').onclick = () => { settings.set('rbold', !settings.get('rbold')); applyReading(); };
+$('optFocus').onclick = () => { settings.set('focusMode', !settings.get('focusMode')); applyReading(); };
+$('optBig').onclick = () => { settings.set('bigBtns', !settings.get('bigBtns')); applyReading(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyReading());
+
+/* ================= 1. VOLVER A DONDE TE DORMISTE ================= */
+function rewindAfterSleep() {
+  const mins = +(settings.get('rewindMin') ?? 2);
+  if (!mins || !state.meta) return;
+  let chars = mins * 60 * CHARS_PER_SEC * settings.get('speed'), i = state.s;
+  while (i > 0 && chars > 0) { i--; chars -= state.sentences[i].t.length + 1; }
+  jumpTo(i, false);
+  saveMeta(true);
+}
+$('rewindSel').value = String(settings.get('rewindMin') ?? 2);
+$('rewindSel').onchange = () => settings.set('rewindMin', +$('rewindSel').value);
+
+/* ================= 2. ALARGAR EL TEMPORIZADOR ================= */
+let lastShake = 0, shakeCount = 0, lastG = null;
+window.addEventListener('devicemotion', e => {
+  const a = e.accelerationIncludingGravity; if (!a || a.x == null) return;
+  const g = Math.hypot(a.x, a.y, a.z);
+  if (lastG != null && Math.abs(g - lastG) > 14) {
+    const now = Date.now();
+    shakeCount = now - lastShake < 1200 ? shakeCount + 1 : 1; lastShake = now;
+    if (shakeCount >= 2) { shakeCount = 0; onShake(); }
+  }
+  lastG = g;
+});
+let shakeCooldown = 0;
+function onShake() {
+  if (Date.now() - shakeCooldown < 3000) return;
+  shakeCooldown = Date.now();
+  if (timer.mode === 'time' && state.playing) { timer.left += 600; timer.render(timer.left); toast('⏱ +10 minutos'); dipVolume(0.6, 400); }
+  else if (!state.playing && timer.endedAt && Date.now() - timer.endedAt < 5 * 60000) { play(); toast('Seguimos leyendo'); }
+}
+async function dipVolume(to, ms) {
+  const v0 = audio.volume; audio.volume = to; bgSound.duck(to);
+  await sleep(ms); if (!timer.fading) { audio.volume = v0; bgSound.duck(1); }
+}
+
+/* ================= 3. COPIA DE SEGURIDAD ================= */
+$('backupBtn').onclick = async () => {
+  try {
+    const metas = await db.all('meta'), contents = await db.all('content'), positions = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^vp-(pos-|settings)/.test(k)) positions[k] = localStorage.getItem(k); }
+    const data = { app: 'voz-y-pagina', version: 1, fecha: new Date().toISOString(), metas, contents, local: positions };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'voz-y-pagina-copia-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    toast(`Copia guardada en Descargas (${metas.length} libros).`, 5000);
+  } catch (e) { toast('No se pudo hacer la copia: ' + e.message, 6000); }
+};
+$('restoreBtn').onclick = () => $('restoreInput').click();
+$('restoreInput').onchange = async () => {
+  const f = $('restoreInput').files[0]; $('restoreInput').value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (data.app !== 'voz-y-pagina' || !Array.isArray(data.metas)) throw new Error('ese archivo no es una copia de Voz y Página');
+    if (!confirm(`¿Restaurar ${data.metas.length} libros de la copia del ${(data.fecha || '').slice(0, 10)}? Los libros que ya tengas se mantienen.`)) return;
+    busy('Restaurando…');
+    for (const c of data.contents || []) await db.put('content', c);
+    for (const m of data.metas) await db.put('meta', m);
+    for (const [k, v] of Object.entries(data.local || {})) { try { localStorage.setItem(k, v); } catch (e) {} }
+    busy(null); toast('✓ Copia restaurada. Recargando…', 3000);
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) { busy(null); toast('No se pudo restaurar: ' + e.message, 6000); }
+};
+
+/* ================= 4. CORREGIR PRONUNCIACIONES ================= */
+let dictRules = [], dictTag = '';
+function loadDict() {
+  const txt = settings.get('dict') || '';
+  dictRules = txt.split('\n').map(l => l.split('=')).filter(p => p.length === 2 && p[0].trim() && p[1].trim()).map(([a, b]) => {
+    const w = a.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return [new RegExp('(?<![\\p{L}\\p{N}])' + w + '(?![\\p{L}\\p{N}])', 'giu'), b.trim()];
+  });
+  let h = 0; for (const c of txt) h = (h * 31 + c.charCodeAt(0)) | 0;
+  dictTag = dictRules.length ? ':' + (h >>> 0).toString(36) : '';
+}
+function applyDict(t) { for (const [re, to] of dictRules) t = t.replace(re, to); return t; }
+$('dictText').value = settings.get('dict') || '';
+$('dictSave').onclick = () => { settings.set('dict', $('dictText').value); loadDict(); toast(dictRules.length ? `Guardadas ${dictRules.length} correcciones.` : 'Sin correcciones.'); restartIfPlaying(); };
+$('dictTest').onclick = async () => {
+  settings.set('dict', $('dictText').value); loadDict();
+  const first = dictRules.length ? $('dictText').value.split('\n')[0].split('=')[0].trim() : 'Prueba';
+  try {
+    const v = piperVoice(); await piper.ensure(v);
+    const b = await piper.speak({ sents: ['Así se pronuncia: ' + first + '.'], pauses: [0.2], text: first }, v, { prio: 0 });
+    const a = new Audio(URL.createObjectURL(b)); await a.play();
+  } catch (e) { toast(e.message, 5000); }
+};
+loadDict();
+
+/* ================= 5. MARCADORES ================= */
+$('addBookmark').onclick = () => {
+  const m = state.meta; if (!m) return;
+  m.bookmarks = m.bookmarks || [];
+  if (m.bookmarks.some(b => b.ch === state.ch && b.s === state.s)) { toast('Ya hay un marcador aquí.'); return; }
+  m.bookmarks.push({ ch: state.ch, s: state.s, text: (state.sentences[state.s]?.t || '').slice(0, 120), at: Date.now() });
+  saveMeta(true); toast('🔖 Marcador guardado. Lo verás en Capítulos.');
+};
+function renderBookmarks() {
+  const m = state.meta, list = (m?.bookmarks || []).slice().sort((a, b) => a.ch - b.ch || a.s - b.s);
+  $('bmList').innerHTML = list.length ? '<div class="lbl" style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin:2px 0 6px">MARCADORES</div>' + list.map(b =>
+    `<div class="ch-item" style="padding:10px"><button data-bm="${b.ch}|${b.s}" style="flex:1;text-align:left;min-width:0"><span style="display:block;white-space:normal;font-size:13px">🔖 ${esc(b.text)}</span><small>${esc(m.chapterTitles[b.ch] || '')}</small></button><button data-bmdel="${b.ch}|${b.s}" aria-label="Borrar marcador" style="padding:8px;color:var(--muted)">✕</button></div>`).join('') + '<div class="lbl" style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin:14px 0 6px">CAPÍTULOS</div>' : '';
+}
+$('bmList').addEventListener('click', e => {
+  const del = e.target.closest('[data-bmdel]'), go = e.target.closest('[data-bm]');
+  if (del) { const [ch, s] = del.dataset.bmdel.split('|').map(Number); state.meta.bookmarks = state.meta.bookmarks.filter(b => !(b.ch === ch && b.s === s)); saveMeta(true); renderBookmarks(); return; }
+  if (go) { const [ch, s] = go.dataset.bm.split('|').map(Number); closeSheets(); goToPlace(ch, s); }
+});
+function goToPlace(ch, s) {
+  const playing = state.playing;
+  if (ch !== state.ch) jumpChapter(ch, false);
+  jumpTo(s, playing);
+}
+
+/* ================= 6. BUSCAR EN EL LIBRO ================= */
+const norm = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+let searchT = 0, searchIndex = null;
+$('openSearch').onclick = () => { openSheet('searchSheet'); setTimeout(() => $('searchInput').focus(), 250); };
+$('searchInput').addEventListener('input', () => { clearTimeout(searchT); searchT = setTimeout(runSearch, 300); });
+function runSearch() {
+  const q = norm($('searchInput').value.trim());
+  if (q.length < 2) { $('searchResults').innerHTML = ''; $('searchInfo').textContent = ''; return; }
+  if (!searchIndex || searchIndex.id !== state.meta.id) searchIndex = { id: state.meta.id, ch: state.chapters.map(t => splitSentences(t).map(x => [x.t, norm(x.t)])) };
+  const res = [];
+  searchIndex.ch.forEach((sents, ch) => sents.forEach(([t, n], s) => { if (res.length < 60 && n.includes(q)) res.push({ ch, s, t, at: n.indexOf(q) }); }));
+  $('searchInfo').textContent = res.length ? (res.length >= 60 ? 'Más de 60 resultados (se muestran los primeros)' : res.length + ' resultados') : 'Sin resultados';
+  $('searchResults').innerHTML = res.map(r => {
+    const a = Math.max(0, r.at - 40), frag = (a ? '…' : '') + r.t.slice(a, r.at + q.length + 60) + (r.at + q.length + 60 < r.t.length ? '…' : '');
+    return `<button class="ch-item" data-go="${r.ch}|${r.s}" style="display:block;white-space:normal;text-align:left"><span style="display:block;white-space:normal;font-size:13px">${esc(frag)}</span><small>${esc(state.meta.chapterTitles[r.ch] || '')}</small></button>`;
+  }).join('');
+}
+$('searchResults').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; const [ch, s] = b.dataset.go.split('|').map(Number); closeSheets(); goToPlace(ch, s); });
+
+/* ================= 7. SONIDO DE FONDO ================= */
+const bgSound = {
+  ctx: null, nodes: [], master: null, type: '', duckLevel: 1,
+  vol() { return (+(settings.get('bgVol') ?? 35) / 100) * 0.35; },
+  noise(kind) {
+    const len = this.ctx.sampleRate * 4, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; if (kind === 'brown') { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; } else d[i] = w; }
+    const src = this.ctx.createBufferSource(); src.buffer = buf; src.loop = true; return src;
+  },
+  start() {
+    const type = settings.get('bgSound') || '';
+    if (!type) { this.stop(); return; }
+    if (this.type === type && this.ctx && this.ctx.state === 'running') return;
+    this.stop();
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      this.ctx.resume();
+      const c = this.ctx, master = c.createGain(); master.gain.value = this.vol() * this.duckLevel; master.connect(c.destination);
+      let src, chain;
+      if (type === 'rain') {
+        src = this.noise('white'); const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 0.5;
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000; src.connect(bp); bp.connect(lp); chain = lp;
+      } else if (type === 'waves') {
+        src = this.noise('brown'); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600;
+        const g = c.createGain(); g.gain.value = 0.55; const lfo = c.createOscillator(); lfo.frequency.value = 0.09; const lg = c.createGain(); lg.gain.value = 0.45;
+        lfo.connect(lg); lg.connect(g.gain); lfo.start(); src.connect(lp); lp.connect(g); chain = g; this.nodes.push(lfo);
+      } else {
+        src = this.noise('brown'); const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; src.connect(lp); chain = lp;
+      }
+      chain.connect(master); src.start();
+      this.nodes.push(src); this.master = master; this.type = type;
+    } catch (e) { this.type = ''; }
+  },
+  stop() { for (const n of this.nodes) { try { n.stop(); } catch (e) {} } this.nodes = []; if (this.master) { try { this.master.disconnect(); } catch (e) {} } this.master = null; this.type = ''; },
+  duck(level) { this.duckLevel = level; if (this.master) this.master.gain.value = this.vol() * level; },
+  setVol() { if (this.master) this.master.gain.value = this.vol() * this.duckLevel; }
+};
+$('bgSel').value = settings.get('bgSound') || '';
+$('bgVol').value = settings.get('bgVol') ?? 35;
+$('bgSel').onchange = () => { settings.set('bgSound', $('bgSel').value); if (state.playing) bgSound.start(); else if (!$('bgSel').value) bgSound.stop(); else { bgSound.start(); setTimeout(() => { if (!state.playing) bgSound.stop(); }, 2500); } };
+$('bgVol').oninput = () => { settings.set('bgVol', +$('bgVol').value); bgSound.setVol(); };
+
+/* ================= MODO COCHE ================= */
+let carLock = null, carIv = 0;
+function skipSecs(secs) {
+  let i = state.s, chars = Math.abs(secs) * CHARS_PER_SEC * settings.get('speed');
+  if (secs < 0) { while (i > 0 && chars > 0) { i--; chars -= state.sentences[i].t.length + 1; } }
+  else { while (i < state.sentences.length - 1 && chars > 0) { chars -= state.sentences[i].t.length + 1; i++; } }
+  jumpTo(i);
+}
+function renderCar() {
+  if ($('carView').classList.contains('hidden') || !state.meta) return;
+  $('carBook').textContent = state.meta.title;
+  $('carCh').textContent = state.meta.chapterTitles[state.ch] || '';
+  $('carSt').textContent = $('status').textContent + (timer.mode === 'time' ? ' · ⏾ ' + fmtClock(timer.left) : '');
+  $('carIcon').innerHTML = state.playing ? '<path d="M7 5h4v14H7zm6 0h4v14h-4z"/>' : '<path d="m8 5 12 7-12 7z"/>';
+}
+$('carChip').onclick = async () => {
+  $('carView').classList.remove('hidden'); renderCar();
+  carIv = setInterval(renderCar, 1000);
+  try { carLock = await navigator.wakeLock?.request('screen'); } catch (e) {}
+};
+$('carExit').onclick = () => { $('carView').classList.add('hidden'); clearInterval(carIv); try { carLock?.release(); } catch (e) {} carLock = null; };
+document.addEventListener('visibilitychange', async () => { if (!document.hidden && !$('carView').classList.contains('hidden')) { try { carLock = await navigator.wakeLock?.request('screen'); } catch (e) {} } });
+$('carPlay').onclick = () => { state.playing ? pause() : play(); setTimeout(renderCar, 50); };
+$('carBack').onclick = () => { skipSecs(-30); renderCar(); };
+$('carFwd').onclick = () => { skipSecs(30); renderCar(); };
+$('carNext').onclick = () => { jumpChapter(state.ch + 1); renderCar(); };
+
+/* ================= INICIO ================= */
+applyReading();
+if (!PIPER_VOICES.some(v => v.id === settings.get('pVoice'))) { settings.set('pVoice', 'carlfm'); $('pVoice').value = 'carlfm'; }
+// voces que ya no se usan: liberar el espacio que ocupaban
+for (const m of ['es_MX-claude-high', 'es_MX-ald-medium', 'es_ES-mls_10246-low', 'es_ES-mls_9972-low', 'es_ES-davefx-medium']) db.del('models', m).catch(() => {});
+// preparar la voz nada más abrir la app (si ya está descargada), así al tocar un libro arranca al momento
+piper.isDownloaded(piperVoice().model).then(ok => { if (ok) setTimeout(() => piper.ensure(piperVoice()).catch(() => {}), 400); }).catch(() => {});
+const inPreview = (() => { try { return window.top !== window.self; } catch (e) { return true; } })();
+if (inPreview) $('previewWarn').classList.remove('hidden');
+refreshSettingsUI();
+renderLibrary();
+window.__vp = { applyDict, cacheKey, bgSound, rewindAfterSleep, preparedKeys, gridOf, timer, audioMem, piper, state, splitSentences, importEpub, resolvePath, chunkAt }; // acceso para pruebas
+})();
+</script>
+</body>
+</html>
