@@ -27,6 +27,19 @@ input[type=number]{width:90px;min-height:44px;background:var(--btn);color:var(--
 .hidden{display:none}
 .custom{display:flex;gap:8px;align-items:center;margin-top:12px}
 .custom span{color:var(--mut);font-size:14px}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px;margin-top:10px}
+details summary{cursor:pointer;padding:10px 0;font-weight:600;list-style:none}
+details summary::after{content:" ▾";color:var(--mut)}
+details[open] summary::after{content:" ▴"}
+details p,details li{color:var(--txt);font-size:15px;line-height:1.5;opacity:.92}
+details ul{padding-left:18px;margin:6px 0 10px}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;margin-left:6px;vertical-align:middle;text-transform:none;letter-spacing:0}
+.b-hi{background:#2e7d32;color:#fff}.b-mid{background:#f9a825;color:#1b1b1b}.b-lo{background:#6d4c41;color:#fff}.b-no{background:#7a3030;color:#fff}
+.note{color:var(--mut);font-size:13px;margin-top:10px;line-height:1.4}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 12px}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+.chips button small{display:block;font-size:11px;opacity:.8;font-weight:400}
 body.night{--bg:#000;--card:#07080c;--txt:#6d7385;--mut:#3d4252;--acc:#3f4f78;--line:#12151d;--btn:#0c0e14}
 body.night::after{content:"";position:fixed;inset:0;background:#000;opacity:.4;pointer-events:none}
 </style>
@@ -38,7 +51,18 @@ body.night::after{content:"";position:fixed;inset:0;background:#000;opacity:.4;p
     <button id="nightBtn" aria-pressed="false">Modo noche</button>
   </header>
 
-  <h2>Ruido</h2>
+  <h2>Ondas cerebrales <span class="badge b-mid">Evidencia moderada</span></h2>
+  <div class="card">
+    <div class="chips" id="waveChips">
+      <button data-beat="0" aria-pressed="true">Ninguna</button>
+      <button data-beat="10">Alfa<small>10 Hz · desconectar</small></button>
+      <button data-beat="6">Theta<small>6 Hz · relajación</small></button>
+      <button data-beat="2">Delta<small>2 Hz · sueño profundo</small></button>
+    </div>
+    <div class="note">🎧 Necesitas auriculares: cada oído recibe un tono distinto (por ejemplo 200 Hz y 210 Hz) y el cerebro «percibe» la diferencia como un pulso lento.</div>
+  </div>
+
+  <h2>Ruido <span class="badge b-hi">El más eficaz</span></h2>
   <div class="card">
     <div class="chips" id="noiseChips">
       <button data-noise="none" aria-pressed="false">Ninguno</button>
@@ -48,33 +72,39 @@ body.night::after{content:"";position:fixed;inset:0;background:#000;opacity:.4;p
     </div>
   </div>
 
-  <h2>Tono</h2>
+  <h2>Tono <span class="badge b-no">Sin efecto demostrado</span></h2>
   <div class="card">
     <div class="row">
       <label for="toneOn">Activar tono</label>
       <input type="checkbox" id="toneOn">
     </div>
     <div class="chips" id="freqChips">
-      <button data-f="40" aria-pressed="false">40 Hz</button>
-      <button data-f="96" aria-pressed="false">96 Hz</button>
+      <button data-f="200" aria-pressed="false">200 Hz</button>
       <button data-f="174" aria-pressed="false">174 Hz</button>
       <button data-f="285" aria-pressed="false">285 Hz</button>
+      <button data-f="396" aria-pressed="false">396 Hz</button>
+      <button data-f="417" aria-pressed="false">417 Hz</button>
       <button data-f="432" aria-pressed="false">432 Hz</button>
       <button data-f="528" aria-pressed="false">528 Hz</button>
+      <button data-f="639" aria-pressed="false">639 Hz</button>
+      <button data-f="741" aria-pressed="false">741 Hz</button>
+      <button data-f="852" aria-pressed="false">852 Hz</button>
+      <button data-f="963" aria-pressed="false">963 Hz</button>
     </div>
     <div class="row" style="margin-top:14px">
-      <span class="lbl">Frecuencia</span><span class="lbl" id="freqVal">40 Hz</span>
+      <span class="lbl">Frecuencia</span><span class="lbl" id="freqVal">200 Hz</span>
     </div>
-    <input type="range" id="freq" min="20" max="600" step="1" value="40">
+    <input type="range" id="freq" min="20" max="1000" step="1" value="200">
     <div class="row">
       <label for="bin">Pulsos binaurales (usa auriculares)</label>
       <input type="checkbox" id="bin">
     </div>
+    <div class="note">Las frecuencias Solfeggio y los 432 Hz no tienen efectos curativos demostrados. Si te relajan, úsalas sin problema: funcionan como un sonido lento y monótono.</div>
     <div id="beatRow" class="hidden">
       <div class="row">
         <span class="lbl">Diferencia entre oídos</span><span class="lbl" id="beatVal">4 Hz</span>
       </div>
-      <input type="range" id="beat" min="1" max="30" step="1" value="4">
+      <input type="range" id="beat" min="1" max="30" step="0.5" value="4">
     </div>
   </div>
 
@@ -105,6 +135,44 @@ body.night::after{content:"";position:fixed;inset:0;background:#000;opacity:.4;p
     <div class="mut">Al terminar, el sonido baja poco a poco y se detiene.</div>
     <button id="cancelTimer" style="width:100%;margin-top:10px">Cancelar temporizador</button>
   </div>
+
+  <h2>Guía: qué funciona y qué no</h2>
+  <details><summary>Lo primero: ciencia frente a humo</summary>
+    <p>En internet se promete reparar el ADN con un tono de 528 Hz. No hay ni un solo estudio clínico serio que lo demuestre. Lo que sí existe es la acústica básica y cómo el cerebro procesa el sonido para bajar revoluciones. Para desconectar, descansar o dormir, las frecuencias se dividen en tres bloques muy distintos.</p>
+  </details>
+  <details><summary>1. Ondas cerebrales (pulsos binaurales)</summary>
+    <p>El cerebro funciona con actividad eléctrica que cambia de ritmo según lo que haces. No se puede oír directamente una onda de 3 Hz (el oído solo capta a partir de unos 20 Hz). El truco: con auriculares, 200 Hz por el oído izquierdo y 203 Hz por el derecho; el cerebro resta la diferencia y genera un pulso «fantasma» de 3 Hz.</p>
+    <p>La evidencia es moderada. No es una pastilla para dormir, pero ayuda a marcar un ritmo lento que invita al sistema nervioso a soltar el acelerador.</p>
+    <ul>
+      <li><b>Alfa (8–13 Hz):</b> para desconectar tras un día pesado. Despierto pero en calma, como ese momento antes de dormirte en el sofá.</li>
+      <li><b>Theta (4–8 Hz):</b> descanso profundo, meditación o sueño ligero. La mente deja de dar vueltas a los problemas.</li>
+      <li><b>Delta (0,5–4 Hz):</b> sueño profundo y reparador. Para quien le cuesta mantener el sueño toda la noche.</li>
+    </ul>
+  </details>
+  <details><summary>2. Ruido de colores (lo más eficaz)</summary>
+    <p>Sin misticismo: física del sonido para tapar ruidos molestos. Si el cerebro está en alerta por un coche o una tubería, el ruido crea un «muro» de sonido constante que apaga esa alarma.</p>
+    <ul>
+      <li><b>Blanco:</b> todas las frecuencias (20 a 20.000 Hz) al mismo volumen. Como una tele sin señal o un ventilador. Algo agudo para dormir, pero tapa cualquier ruido repentino.</li>
+      <li><b>Rosa:</b> menos agudos y más graves. Como lluvia constante o viento entre árboles. Algunos estudios pequeños sugieren que ayuda a estabilizar el sueño profundo.</li>
+      <li><b>Marrón (o rojo):</b> mucho más grave, como una cascada lejana o el interior de un avión. El favorito de las mentes inquietas, aunque faltan ensayos clínicos grandes.</li>
+    </ul>
+  </details>
+  <details><summary>3. Solfeggio y 432 Hz (el mito)</summary>
+    <p>Hay listas con 174 Hz para el dolor, 285 Hz para regenerar tejidos, 396 Hz para el miedo, 417 Hz para los cambios, 432 Hz como «afinación del universo», 528 Hz para el amor, 639, 741, 852 y 963 Hz.</p>
+    <p>No existe evidencia de que ninguna tenga propiedades curativas ni efectos biológicos concretos. Si te duermes con 432 o 528 Hz no es por el número: es música lenta, monótona, sin golpes ni cambios de volumen. Funciona por puro «aburrimiento acústico», y si a ti te relaja, úsala sin problema.</p>
+  </details>
+  <details><summary>Resumen en una tabla</summary>
+    <table>
+      <tr><th>Tipo</th><th>Para qué</th><th>Respaldo</th></tr>
+      <tr><td>Alfa (8–13 Hz)</td><td>Desconectar y bajar estrés</td><td>Moderado (auriculares)</td></tr>
+      <tr><td>Theta (4–8 Hz)</td><td>Relajación profunda, sueño ligero</td><td>Moderado (auriculares)</td></tr>
+      <tr><td>Delta (0,5–4 Hz)</td><td>Sueño profundo</td><td>Moderado (auriculares)</td></tr>
+      <tr><td>Ruido blanco</td><td>Tapar ruidos de fuera</td><td>Alto (como enmascarador)</td></tr>
+      <tr><td>Ruido rosa</td><td>Estabilizar el sueño profundo</td><td>Moderado / prometedor</td></tr>
+      <tr><td>Ruido marrón</td><td>Calmar la mente acelerada</td><td>Bajo en clínica, alto en uso real</td></tr>
+      <tr><td>Solfeggio / 432 Hz</td><td>Relajación general</td><td>Nulo (placebo y música lenta)</td></tr>
+    </table>
+  </details>
 </main>
 
 <script>
@@ -329,6 +397,26 @@ $('#bin').addEventListener('change', e => {
 $('#beat').addEventListener('input', e => { $('#beatVal').textContent = e.target.value + ' Hz'; });
 $('#beat').addEventListener('change', () => { if (playing) startTone(); });
 
+// Ondas cerebrales: tono base 200 Hz con pulsos binaurales
+document.getElementById('waveChips').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  setPressed($('#waveChips'), b);
+  const beat = +b.dataset.beat;
+  if (beat > 0) {
+    $('#toneOn').checked = true; $('#bin').checked = true; $('#beatRow').classList.remove('hidden');
+    $('#freq').value = 200; $('#freqVal').textContent = '200 Hz';
+    document.querySelectorAll('#freqChips button').forEach(x => x.setAttribute('aria-pressed', x.dataset.f === '200' ? 'true' : 'false'));
+    $('#beat').value = beat; $('#beatVal').textContent = beat + ' Hz';
+    if (+$('#tv').value < 0.3) { $('#tv').value = 0.4; }
+    if (!playing) play(); else startTone();
+    status('Sonando · ' + b.firstChild.textContent.trim() + ' (' + beat + ' Hz) · usa auriculares');
+  } else {
+    $('#bin').checked = false; $('#toneOn').checked = false; $('#beatRow').classList.add('hidden');
+    if (playing) { startTone(); status('Sonando'); }
+  }
+  applyVolumes();
+});
+
 // Volumen
 $('#nv').addEventListener('input', applyVolumes);
 $('#tv').addEventListener('input', applyVolumes);
@@ -366,6 +454,6 @@ $('#nightBtn').addEventListener('click', () => {
 </script>
 
 <!-- botón para volver al menú de apps (añadido) -->
-<a href="./#apps" id="vpHome" aria-label="Volver al menú de apps" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483647;width:44px;height:44px;border-radius:50%;background:#7b5a3cE6;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font:600 20px/1 system-ui,sans-serif;box-shadow:0 2px 10px #0006">⌂</a>
+<a href="./" id="vpHome" aria-label="Volver al menú de apps" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483647;width:42px;height:42px;border-radius:50%;background:#7b5a3cD9;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font:600 20px/1 system-ui,sans-serif;box-shadow:0 2px 10px #0006">⌂</a>
 </body>
 </html>
