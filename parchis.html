@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parchís y damas contra el móvil</title>
+<style>
+html,body{margin:0;height:100%;background:radial-gradient(circle at 50% 30%,#2e6b52,#143026);font-family:system-ui,sans-serif;color:#fff;overflow:hidden;user-select:none;touch-action:manipulation}
+#menu,#game,#rules{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;box-sizing:border-box;padding:16px}
+#game{justify-content:flex-start;padding:8px;gap:8px}
+#rules{justify-content:flex-start;overflow-y:auto;padding-top:24px}
+[hidden]{display:none!important}
+button{font-size:18px;padding:12px 24px;border:0;border-radius:24px;background:#ffd54f;color:#222;font-weight:700;cursor:pointer;box-shadow:0 4px 0 #b08d1f}
+button:disabled{opacity:.4}
+#top{display:flex;gap:8px;align-items:center;justify-content:space-between;width:100%;max-width:600px}
+#top button{font-size:15px;padding:8px 14px;box-shadow:none}
+#status{font-size:19px;font-weight:700;min-height:48px;text-align:center;padding:0 12px;line-height:1.3;text-shadow:0 2px 4px rgba(0,0,0,.6)}
+#die{width:96px;height:96px;margin:4px auto;border-radius:18px;background:#fff;cursor:pointer;box-shadow:0 6px 0 #9e9e9e,0 10px 20px rgba(0,0,0,.4);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:12px;box-sizing:border-box}
+#die i{width:18px;height:18px;border-radius:50%;align-self:center;justify-self:center}
+#die i.on{background:#222}
+.pips{width:88px;height:88px;background:#fff;border-radius:16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:10px;box-sizing:border-box;box-shadow:0 5px 0 #9e9e9e}
+.pips i{width:18px;height:18px;border-radius:50%;align-self:center;justify-self:center}
+.pips i.on{background:#222}
+#pick{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.pc{width:72px;height:72px;border-radius:50%;border:4px solid #fff;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.4)}
+#rlist{display:flex;flex-direction:column;gap:12px;width:100%;max-width:520px}
+.ropt{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.1);padding:12px;border-radius:14px;font-size:16px;line-height:1.3}
+.ropt input{width:24px;height:24px;margin-top:2px;flex:0 0 auto}
+.ropt small{display:block;opacity:.75;font-size:13px;margin-top:4px}
+canvas{display:block;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+</style>
+</head>
+<body>
+<div id="menu">
+  <h1 style="margin:0">Contra el móvil</h1>
+  <button id="goDamas">Damas</button>
+  <button id="goParchis">Parchís</button>
+</div>
+<div id="rules" hidden>
+  <h2 id="rtitle" style="margin:0"></h2>
+  <div id="rlist"></div>
+  <button id="rgo">Continuar</button>
+  <button id="rback">← Menú</button>
+</div>
+<div id="game" hidden>
+  <div id="top"><button id="back">← Menú</button><b id="title"></b><button id="action">-</button></div>
+  <canvas id="cv"></canvas>
+  <div id="status"></div>
+  <div id="pick" hidden></div>
+  <div id="die" hidden></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'), ctx=cv.getContext('2d');
+let mode=null, timer=null;
+
+/* ================= OPCIONES ================= */
+const RULES={
+  dif:'medio',
+  p:{obligSalida:true, primera:false, repite6:true, seises:true, barreras:true,
+     bonus20:false, bonus10:false, capSalida:false,
+     fichaInicial:false, seis7:false, capOblig:true, dosDados:false, parejas:false},
+  d:{capOblig:true, volante:false, capMax:false}
+};
+const RULESETS={
+  p:[
+    {k:'obligSalida', t:'Con un 5, si tienes fichas en casa, debes sacar una', d:'Si sacas un 5 y puedes salir, no puedes mover las fichas del pasillo.'},
+    {k:'primera', t:'Primera tirada: sales con cualquier número', d:'Solo en tu primera tirada: sacas una ficha con cualquier número y avanzas lo que marque el dado. Después, las fichas de casa necesitan un 5.'},
+    {k:'repite6', t:'Un 6 te da turno extra', d:'Con un 6 vuelves a tirar después de mover.'},
+    {k:'seises', t:'Tres seises seguidos: la última ficha movida vuelve a casa', d:'Si la ficha ya está en la columna de meta, no vuelve.'},
+    {k:'barreras', t:'Las barreras bloquean el paso', d:'Dos fichas del mismo color en una casilla no pueden ser pasadas ni comidas.'},
+    {k:'bonus20', t:'Al comer, avanzas 20 casillas', d:'Con la ficha que elijas, avanzas 20 casillas tras comer.'},
+    {k:'bonus10', t:'Al llegar a meta, avanzas 10 casillas', d:'Con cualquier ficha. Si ninguna puede moverse, no hay premio.'},
+    {k:'capSalida', t:'Puedes comer al salir con un 5', d:'Si hay una ficha rival en tu salida, al sacar la comes.'},
+    {k:'fichaInicial', t:'Empiezas con una ficha ya en el tablero', d:'Cada jugador empieza con una ficha en su salida.'},
+    {k:'seis7', t:'Un 6 avanza 7 si no tienes fichas en casa', d:'Solo cuando todas tus fichas están fuera.'},
+    {k:'capOblig', t:'Captura obligatoria en el parchís', d:'Si puedes comer, tienes que hacerlo.'},
+    {k:'dosDados', t:'Dos dados por turno', d:'Cada dado puede usarse en una ficha distinta. Si sacas dobles, repites turno.'},
+    {k:'parejas', t:'Jugar por parejas', d:'Tu compañero es el color de enfrente y lo controla el móvil. Ganáis si las 8 fichas llegan a meta.'}
+  ],
+  d:[
+    {k:'capOblig', t:'La captura es obligatoria', d:'Si puedes comer, tienes que hacerlo. Si lo desactivas, puedes mover sin comer.'},
+    {k:'volante', t:'Dama volante', d:'La dama se mueve por toda la diagonal libre y puede comer a distancia.'},
+    {k:'capMax', t:'Captura máxima obligatoria', d:'Si hay varias capturas, debes elegir la que se come más piezas.'}
+  ]
+};
+const DDEPTH={facil:1, medio:2, dificil:3};
+const DNOISE={facil:0.8, medio:0.15, dificil:0.02};
+const DLABEL=[['facil','Fácil'],['medio','Medio'],['dificil','Complicado']];
+
+function showRules(g){
+  $('menu').hidden=true; $('game').hidden=true; $('rules').hidden=false;
+  $('rtitle').textContent=g==='p'?'Reglas del parchís':'Reglas de las damas';
+  const list=$('rlist'); list.innerHTML='';
+
+  const drow=document.createElement('div');
+  drow.style.cssText='display:flex;gap:8px;justify-content:center;width:100%;max-width:520px;';
+  const btns=[];
+  const paintD=()=>btns.forEach(([k,b])=>{ const on=RULES.dif===k; b.style.background=on?'#ffd54f':'rgba(255,255,255,.25)'; b.style.color=on?'#222':'#fff'; });
+  for(const [k,t] of DLABEL){
+    const b=document.createElement('button'); b.textContent=t; b.style.fontSize='16px'; b.style.padding='10px 16px';
+    b.onclick=()=>{ RULES.dif=k; paintD(); };
+    btns.push([k,b]); drow.appendChild(b);
+  }
+  paintD(); list.appendChild(drow);
+
+  for(const r of RULESETS[g]){
+    const lab=document.createElement('label'); lab.className='ropt';
+    const cb=document.createElement('input'); cb.type='checkbox'; cb.id='r_'+r.k;
+    cb.checked=!!RULES[g][r.k];
+    const span=document.createElement('span'); span.textContent=r.t;
+    const sm=document.createElement('small'); sm.textContent=r.d; span.appendChild(sm);
+    lab.appendChild(cb); lab.appendChild(span); list.appendChild(lab);
+  }
+  $('rgo').onclick=()=>{
+    for(const r of RULESETS[g]) RULES[g][r.k]=$('r_'+r.k).checked;
+    $('rules').hidden=true;
+    if(g==='p') startParchis(); else startDamas();
+  };
+}
+$('rback').onclick=()=>{ $('rules').hidden=true; $('menu').hidden=false; };
+$('goDamas').onclick=()=>showRules('d');
+$('goParchis').onclick=()=>showRules('p');
+
+/* ================= PANTALLA ================= */
+function size(){
+  const S=Math.floor(Math.min(innerWidth-6, innerHeight-118));
+  cv.width=S; cv.height=S; cv.style.width=S+'px'; cv.style.height=S+'px';
+}
+function show(){ $('menu').hidden=true; $('rules').hidden=true; $('game').hidden=false; }
+function status(t){ $('status').textContent=t; }
+function stopTimer(){ clearTimeout(timer); timer=null; }
+function rr(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+}
+function drawPath(pts){
+  ctx.beginPath();
+  pts.forEach(([x,y],j)=>{ if(j) ctx.lineTo(x,y); else ctx.moveTo(x,y); });
+  ctx.closePath();
+}
+
+$('back').onclick=()=>{ stopTimer(); mode=null; $('game').hidden=true; $('menu').hidden=false; };
+cv.addEventListener('pointerdown',e=>{
+  const r=cv.getBoundingClientRect(), x=e.clientX-r.left, y=e.clientY-r.top;
+  if(mode==='d') clickD(x,y); else if(mode==='p') clickP(x,y);
+});
+addEventListener('resize',()=>{
+  if(mode==='d'){ size(); drawD(); }
+  else if(mode==='p'){ size(); drawP(performance.now()); }
+});
+
+/* ================= DAMAS ================= */
+let B, turnD, selD, legalD, overD;
+function initB(){
+  const b=Array.from({length:8},()=>Array(8).fill(0));
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++) if((r+c)%2===1){
+    if(r<3) b[r][c]='b'; else if(r>4) b[r][c]='r';
+  }
+  return b;
+}
+const owner=p=>p==='r'||p==='R'?'r':(p==='b'||p==='B'?'b':null);
+const isKing=p=>p==='R'||p==='B';
+function dirsFor(p){
+  if(isKing(p)) return [[-1,-1],[-1,1],[1,-1],[1,1]];
+  return owner(p)==='r'?[[-1,-1],[-1,1]]:[[1,-1],[1,1]];
+}
+// captura normal: salto de una pieza, con saltos encadenados
+function capSeqs(b,r0,c0,p){
+  const out=[];
+  (function rec(r,c,path,taken){
+    let any=false;
+    for(const [dr,dc] of dirsFor(p)){
+      const mr=r+dr, mc=c+dc, lr=r+2*dr, lc=c+2*dc;
+      if(lr<0||lc<0||lr>7||lc>7) continue;
+      const m=b[mr][mc];
+      if(!m||owner(m)===owner(p)) continue;
+      if(taken.some(([a,q])=>a===mr&&q===mc)) continue;
+      if(b[lr][lc]) continue;
+      any=true;
+      rec(lr,lc,[...path,[lr,lc]],[...taken,[mr,mc]]);
+    }
+    if(!any&&taken.length) out.push({path,taken});
+  })(r0,c0,[],[]);
+  return out;
+}
+// dama volante: captura a distancia y aterriza en cualquier casilla libre tras la pieza
+function volanteSeqs(b,r0,c0,p){
+  const out=[];
+  (function rec(r,c,path,taken){
+    let any=false;
+    for(const [dr,dc] of dirsFor(p)){
+      let y=r+dr, x=c+dc;
+      while(y>=0&&x>=0&&y<8&&x<8&&!b[y][x]){ y+=dr; x+=dc; }
+      if(!(y>=0&&x>=0&&y<8&&x<8)) continue;
+      const m=b[y][x];
+      if(!m||owner(m)===owner(p)) continue;
+      if(taken.some(([a,q])=>a===y&&q===x)) continue;
+      let ly=y+dr, lx=x+dc;
+      while(ly>=0&&lx>=0&&ly<8&&lx<8&&!b[ly][lx]){
+        any=true;
+        rec(ly,lx,[...path,[ly,lx]],[...taken,[y,x]]);
+        ly+=dr; lx+=dc;
+      }
+    }
+    if(!any&&taken.length) out.push({path,taken});
+  })(r0,c0,[],[]);
+  return out;
+}
+function genMoves(b,side){
+  const caps=[], steps=[];
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p=b[r][c]; if(!p||owner(p)!==side) continue;
+    const bb=b.map(row=>row.slice()); bb[r][c]=0;
+    const flying=RULES.d.volante&&isKing(p);
+    const seqs=flying?volanteSeqs(bb,r,c,p):capSeqs(bb,r,c,p);
+    for(const s of seqs) caps.push({from:[r,c],path:s.path,taken:s.taken});
+    for(const [dr,dc] of dirsFor(p)){
+      let nr=r+dr, nc=c+dc;
+      while(nr>=0&&nc>=0&&nr<8&&nc<8&&!b[nr][nc]){
+        steps.push({from:[r,c],path:[[nr,nc]],taken:[]});
+        if(!flying) break;
+        nr+=dr; nc+=dc;
+      }
+    }
+  }
+  let cs=caps;
+  if(cs.length && RULES.d.capMax){
+    const mx=Math.max(...cs.map(m=>m.taken.length));
+    cs=cs.filter(m=>m.taken.length===mx);
+  }
+  if(cs.length && RULES.d.capOblig) return cs;
+  return cs.concat(steps);
+}
+function applyMove(b,m){
+  const nb=b.map(row=>row.slice());
+  let p=nb[m.from[0]][m.from[1]];
+  nb[m.from[0]][m.from[1]]=0;
+  for(const [r,c] of m.taken) nb[r][c]=0;
+  const [er,ec]=m.path[m.path.length-1];
+  if(p==='r'&&er===0) p='R';
+  if(p==='b'&&er===7) p='B';
+  nb[er][ec]=p;
+  return nb;
+}
+function evalB(b){
+  let s=0;
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p=b[r][c]; if(!p) continue;
+    const v=(isKing(p)?1.6:1)+(owner(p)==='b'?r:7-r)*0.03;
+    s+=owner(p)==='b'?v:-v;
+  }
+  return s;
+}
+// minimax con poda alfa-beta; el móvil son las negras ('b')
+function mm(b,side,d,a,be){
+  if(d===0) return evalB(b);
+  const ms=genMoves(b,side);
+  if(!ms.length) return side==='b'?-100:100;
+  if(side==='b'){
+    let best=-Infinity;
+    for(const m of ms){
+      const v=mm(applyMove(b,m),'r',d-1,a,be);
+      if(v>best) best=v;
+      if(best>a) a=best;
+      if(be<=a) break;
+    }
+    return best;
+  }
+  let best=Infinity;
+  for(const m of ms){
+    const v=mm(applyMove(b,m),'b',d-1,a,be);
+    if(v<best) best=v;
+    if(best<be) be=best;
+    if(be<=a) break;
+  }
+  return best;
+}
+
+function startDamas(){
+  show(); stopTimer(); mode='d';
+  $('title').textContent='Damas';
+  $('action').textContent='Nueva partida';
+  $('action').disabled=false;
+  $('action').onclick=startDamas;
+  $('die').hidden=true; $('pick').hidden=true;
+  $('status').style.color='#fff';
+  B=initB(); turnD='r'; selD=null; legalD=[]; overD=false;
+  size(); status('Tu turno: mueve una ficha roja'); drawD();
+}
+function clickD(x,y){
+  if(overD||turnD!=='r') return;
+  const cs=cv.width/8;
+  const c=Math.floor(x/cs), r=Math.floor(y/cs);
+  if(r<0||c<0||r>7||c>7) return;
+  if(selD){
+    const m=legalD.find(m=>{ const e=m.path[m.path.length-1]; return e[0]===r&&e[1]===c; });
+    if(m){ B=applyMove(B,m); selD=null; legalD=[]; afterHumanD(); return; }
+  }
+  const mine=genMoves(B,'r').filter(m=>m.from[0]===r&&m.from[1]===c);
+  if(mine.length){ selD=[r,c]; legalD=mine; } else { selD=null; legalD=[]; }
+  drawD();
+}
+function afterHumanD(){
+  drawD();
+  if(genMoves(B,'b').length===0){ overD=true; status('¡Ganas tú!'); drawD(); return; }
+  turnD='b'; status('Piensa el móvil…');
+  timer=setTimeout(aiD,500);
+}
+function aiD(){
+  const ms=genMoves(B,'b');
+  if(!ms.length){ overD=true; status('¡Ganas tú!'); drawD(); return; }
+  let best=null, bv=-Infinity;
+  for(const m of ms){
+    const v=mm(applyMove(B,m),'r',DDEPTH[RULES.dif],-Infinity,Infinity)+Math.random()*DNOISE[RULES.dif];
+    if(v>bv){ bv=v; best=m; }
+  }
+  B=applyMove(B,best); turnD='r';
+  if(genMoves(B,'r').length===0){ overD=true; status('Gana el móvil'); drawD(); return; }
+  status('Tu turno: mueve una ficha roja'); drawD();
+}
+function drawD(){
+  const S=cv.width, cs=S/8;
+  ctx.clearRect(0,0,S,S);
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    ctx.fillStyle=(r+c)%2?'#6d4c41':'#efe0c2';
+    ctx.fillRect(c*cs,r*cs,cs,cs);
+  }
+  if(selD){ ctx.fillStyle='rgba(255,235,59,.6)'; ctx.fillRect(selD[1]*cs,selD[0]*cs,cs,cs); }
+  for(const m of legalD){
+    const [r,c]=m.path[m.path.length-1];
+    ctx.fillStyle='rgba(76,175,80,.8)';
+    ctx.beginPath(); ctx.arc((c+.5)*cs,(r+.5)*cs,cs*.15,0,Math.PI*2); ctx.fill();
+  }
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const p=B[r][c]; if(!p) continue;
+    const x=(c+.5)*cs, y=(r+.5)*cs;
+    ctx.beginPath(); ctx.arc(x,y,cs*.38,0,Math.PI*2);
+    ctx.fillStyle=owner(p)==='r'?'#e53935':'#212121';
+    ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle='#fff'; ctx.stroke();
+    if(isKing(p)){
+      ctx.fillStyle='#ffd54f';
+      ctx.font=`bold ${Math.round(cs*.35)}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('K',x,y);
+    }
+  }
+}
+
+/* ================= PARCHÍS =================
+   Tablero 19x19. Anillo de 68 casillas (17 por brazo), sentido antihorario.
+   Progreso v de cada ficha: -1 = casa; 0..67 = anillo desde su salida;
+   68..74 = columna de meta (74 = meta exacta).
+*/
+const NP=4, RING=68, ENT=63, GOAL=70;
+const TILT=1; // inclinación: 1 = plano, menor = más inclinado
+const NAMES=['Rojo','Azul','Verde','Amarillo'];
+const PCOL=['#e53935','#1e88e5','#43a047','#fdd835'];
+const START=[13,30,47,64];
+const SAFE=new Set([...START, ...START.map(s=>(s+58)%68), ...START.map(s=>(s+63)%68)]);
+const RS=[[10,7],[10,6],[10,5],[10,4],[10,3],[10,2],[10,1],[10,0],[9,0],[8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,6],[8,7]];
+const NEST0=[[2,2],[5,2],[2,5],[5,5]];
+const PAT={0:[4],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+
+// giro de 90º en casillas y en coordenadas continuas
+function rotN(pt,n){ let x=pt[0], y=pt[1]; for(let i=0;i<n;i++){ const nx=y; y=18-x; x=nx; } return [x,y]; }
+function rotC(pt,n){ let x=pt[0], y=pt[1]; for(let i=0;i<n;i++){ const nx=y; y=19-x; x=nx; } return [x,y]; }
+function ringXY(k){ return rotN(RS[k%17], Math.floor(k/17)); }
+function homeXY(p,h){ return rotN([9,h],p); }
+function nestXY(p,i){ return rotN(NEST0[i],p); }
+
+let NAME='Jugador', ANAMES=[], HUMAN=0, PP, LAST, FIRST, SIX, lastRoll, BONUS=0, DV=[], DUSED=[false,false];
+let pTurn, pPhase, pRoll, pBusy, pOver, picking=false;
+const who=p=>p===HUMAN?NAME:ANAMES[p]+' ('+NAMES[p]+')';
+const partnerOf=p=>(p+2)%4;
+const teamOf=p=>RULES.p.parejas?[p,partnerOf(p)]:[p];
+const ringIdx=(p,v)=>(START[p]+v)%RING;
+
+// barrera: dos fichas del mismo color en una casilla
+function barrierAt(k){
+  if(!RULES.p.barreras) return false;
+  for(let q=0;q<NP;q++){
+    let n=0;
+    for(const v of PP[q]) if(v>=0&&v<=ENT&&ringIdx(q,v)===k) n++;
+    if(n>=2) return true;
+  }
+  return false;
+}
+// fichas rivales en una casilla (la compañera no cuenta en parejas)
+function rivalsAt(k,p){
+  const out=[];
+  for(let q=0;q<NP;q++){
+    if(q===p || (RULES.p.parejas && q===partnerOf(p))) continue;
+    PP[q].forEach((v,j)=>{ if(v>=0&&v<=ENT&&ringIdx(q,v)===k) out.push([q,j]); });
+  }
+  return out;
+}
+function moveInfo(p,i,roll){
+  const v=PP[p][i];
+  let to;
+  if(v<0){
+    if(roll!==5) return null;
+    to=0;
+  } else {
+    const step=(roll===6 && RULES.p.seis7 && PP[p].every(x=>x>=0))?7:roll;
+    to=v+step;
+    if(to>GOAL) return null;
+  }
+  for(let u=(v<0?0:v+1); u<=Math.min(to,ENT); u++){
+    if(barrierAt(ringIdx(p,u))) return null;
+  }
+  if(to>ENT) return {to, caps:[]};
+  const k=ringIdx(p,to);
+  const exitCapture=(to===0 && RULES.p.capSalida);
+  const rivals=(SAFE.has(k)&&!exitCapture)?[]:rivalsAt(k,p);
+  return {to, caps: rivals.length===1?rivals:[]};
+}
+// primera tirada: sale una ficha con cualquier número y avanza ese número; con 5 salen dos
+function firstInfo(p,roll){
+  for(let u=0;u<=roll;u++) if(barrierAt(ringIdx(p,u))) return null;
+  const k=ringIdx(p,roll);
+  const rv=SAFE.has(k)?[]:rivalsAt(k,p);
+  return {to:roll, caps: rv.length===1?rv:[]};
+}
+function legalP(p,roll){
+  if(RULES.p.primera && FIRST[p]){
+    const nest=[0,1,2,3].filter(i=>PP[p][i]<0);
+    if(!nest.length) return [];
+    if(roll===5) return [{i:nest[0], info:{to:0, caps:[], dbl:nest.length>=2?nest[1]:undefined}}];
+    const fi=firstInfo(p,roll);
+    return fi?[{i:nest[0], info:fi}]:[];
+  }
+  let out=[];
+  for(let i=0;i<4;i++){ const info=moveInfo(p,i,roll); if(info) out.push({i,info}); }
+  if(RULES.p.obligSalida && roll===5 && out.some(x=>PP[p][x.i]<0)) out=out.filter(x=>PP[p][x.i]<0);
+  if(RULES.p.capOblig && out.some(x=>x.info.caps.length)) out=out.filter(x=>x.info.caps.length);
+  return out;
+}
+// jugadas disponibles ahora mismo: premio pendiente, dos dados o la tirada normal
+function availableMoves(p){
+  if(BONUS) return legalP(p,BONUS).map(e=>({...e, v:BONUS}));
+  if(RULES.p.dosDados){
+    const out=[];
+    DV.forEach((v,j)=>{ if(!DUSED[j]) legalP(p,v).forEach(e=>out.push({...e, v, j})); });
+    return out;
+  }
+  return legalP(p,pRoll).map(e=>({...e, v:pRoll}));
+}
+
+// posición de cada ficha en el tablero (sin girar)
+function pieceXY(p,i){
+  const v=PP[p][i];
+  if(v<0) return nestXY(p,i);
+  if(v<=ENT) return ringXY(ringIdx(p,v));
+  return homeXY(p,v-ENT);
+}
+// posición y dirección del pasillo donde está la ficha (en coordenadas de tablero)
+function posOf(p,v){ return v<=ENT ? ringXY(ringIdx(p,v)) : homeXY(p,v-ENT); }
+function laneDir(p,i){
+  const v=PP[p][i];
+  if(v<0) return [1,0];
+  let a,b;
+  if(v<GOAL){ a=posOf(p,v); b=posOf(p,v+1); } else { a=posOf(p,v-1); b=posOf(p,v); }
+  const dx=b[0]-a[0], dy=b[1]-a[1], n=Math.hypot(dx,dy)||1;
+  return [dx/n, dy/n];
+}
+// fichas que comparten casilla: si son dos, una detrás de otra en el sentido del pasillo
+function pieceSlot(p,i){
+  const [gx,gy]=pieceXY(p,i);
+  const list=[];
+  for(let q=0;q<NP;q++) for(let j=0;j<4;j++){
+    const [x,y]=pieceXY(q,j);
+    if(x===gx&&y===gy) list.push([q,j]);
+  }
+  if(list.length<=1) return [0,0,1];
+  const idx=list.findIndex(([q,j])=>q===p&&j===i);
+  // los desplazamientos se piensan en pantalla y se pasan al tablero girado
+  const th=viewM()*Math.PI/2;
+  if(list.length===2){ const [dx,dy]=laneDir(p,i); const o=idx?0.34:-0.34; return [o*dx, o*dy, 0.5]; }
+  const off=[[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]][idx]||[0,0];
+  return [off[0]*Math.cos(th)-off[1]*Math.sin(th), off[0]*Math.sin(th)+off[1]*Math.cos(th), 0.5];
+}
+// centro de una ficha en coordenadas de tablero (casillas)
+function centerOf(p,i){
+  const [gx,gy]=pieceXY(p,i);
+  const sl=pieceSlot(p,i);
+  return [gx+.5+sl[0], gy+.5+sl[1]];
+}
+// tu color siempre abajo a la derecha: el tablero gira alrededor del centro
+function viewM(){ return (2-HUMAN+4)%4; }
+function toBoard(x,y){
+  const S=cv.width, th=viewM()*Math.PI/2, dx=x-S/2, dy=(y-S/2)/TILT;
+  return [dx*Math.cos(th)-dy*Math.sin(th)+S/2, dx*Math.sin(th)+dy*Math.cos(th)+S/2];
+}
+
+/* ---------- flujo de la partida ---------- */
+function startParchis(){
+  show(); stopTimer(); mode='p';
+  $('title').textContent='Parchís';
+  $('action').disabled=true; $('action').textContent='🎲 Tirar';
+  $('die').hidden=true;
+  picking=true;
+  askName();
+  size(); drawP(performance.now());
+}
+function askName(){
+  status('¿Cómo te llamas?');
+  const pk=$('pick'); pk.innerHTML=''; pk.hidden=false;
+  const inp=document.createElement('input');
+  inp.type='text'; inp.maxLength=12; inp.placeholder='Tu nombre';
+  inp.style.cssText='font-size:20px;padding:10px;border-radius:12px;border:0;width:200px;text-align:center';
+  const ok=document.createElement('button'); ok.textContent='Continuar';
+  ok.onclick=()=>{ NAME=inp.value.trim()||'Jugador'; showColors(); };
+  pk.appendChild(inp); pk.appendChild(ok);
+}
+function showColors(){
+  status('Hola '+NAME+', elige tu color');
+  const pk=$('pick'); pk.innerHTML=''; pk.hidden=false;
+  NAMES.forEach((n,i)=>{
+    const b=document.createElement('button');
+    b.className='pc'; b.style.background=PCOL[i]; b.title=n;
+    b.onclick=()=>pickColor(i);
+    pk.appendChild(b);
+  });
+  size(); drawP(performance.now());
+}
+function pickColor(i){
+  HUMAN=i; picking=false;
+  const pool=['Lucía','Marta','Carlos','Javier','Ana','Pablo','Elena','Sergio','Irene','Hugo'].sort(()=>Math.random()-.5);
+  let k=0; ANAMES=[0,1,2,3].map(q=>q===i?NAME:pool[k++]);
+  $('pick').hidden=true; $('die').hidden=false;
+  PP=Array.from({length:NP},()=>[-1,-1,-1,-1]);
+  if(RULES.p.fichaInicial) for(let q=0;q<NP;q++) PP[q][0]=0;
+  LAST=[null,null,null,null]; FIRST=[true,true,true,true];
+  SIX=0; lastRoll=0; BONUS=0; DV=[]; DUSED=[false,false];
+  pTurn=0; pPhase='roll'; pRoll=0; pBusy=false; pOver=false;
+  statusTurn();
+  scheduleAI();
+}
+function statusTurn(extra){
+  status((extra?extra+'. ':'')+(pTurn===HUMAN?NAME+' ('+NAMES[HUMAN]+'), tira el dado':'Turno de '+who(pTurn)));
+}
+function scheduleAI(){
+  if(pTurn!==HUMAN && !pOver) timer=setTimeout(rollP,1200);
+}
+function rollP(){
+  if(picking||pPhase!=='roll'||pBusy||pOver) return;
+  const p=pTurn;
+  pRoll=1+Math.floor(Math.random()*6);
+  lastRoll=pRoll;
+  if(RULES.p.dosDados){
+    DV=[pRoll, 1+Math.floor(Math.random()*6)];
+    DUSED=[false,false];
+  }
+  pPhase='move';
+  SIX = pRoll===6 ? SIX+1 : 0;
+  if(RULES.p.seises && SIX===3){
+    pBusy=true;
+    const i=LAST[p];
+    let msg=who(p)+' saca tres seises: ';
+    if(i!==null && PP[p][i]>=0 && PP[p][i]<=ENT){ PP[p][i]=-1; msg+='la última ficha vuelve a casa'; }
+    else msg+='no hay ficha que devolver';
+    SIX=0; status(msg);
+    timer=setTimeout(()=>{ pBusy=false; endTurn(false); },2000);
+    return;
+  }
+  if(!availableMoves(p).length){
+    pBusy=true;
+    status(who(p)+': sin movimientos'+(RULES.p.dosDados?'':' con '+pRoll));
+    timer=setTimeout(()=>{ pBusy=false; endTurn(false); },1600);
+    return;
+  }
+  if(p!==HUMAN){
+    pBusy=true; status(who(p)+' saca '+pRoll+'. Juega…');
+    timer=setTimeout(()=>{ pBusy=false; aiPlay(p); },1500);
+    return;
+  }
+  autoOrWait(p);
+}
+// si solo hay una jugada, se hace sola; si hay varias, eliges tú
+function autoOrWait(p){
+  if(availableMoves(p).length===1){
+    status('Solo puedes mover esa ficha');
+    timer=setTimeout(()=>{ if(!pOver&&pPhase==='move'&&pTurn===HUMAN){ const m=availableMoves(HUMAN); if(m.length) doMove(HUMAN,m[0]); } },1200);
+    return;
+  }
+  status(NAME+', elige una ficha iluminada');
+}
+function scoreMove(p,e){
+  if(RULES.dif==='facil') return Math.random();
+  const hard=RULES.dif==='dificil';
+  const {info}=e, v=PP[p][e.i];
+  let s=info.caps.length*(hard?15:10)+(info.to===GOAL?12:0)+(info.to>ENT?3:0)+(v<0?6:0)+info.to*0.1;
+  if(info.to<=ENT && SAFE.has(ringIdx(p,info.to))) s+=1;
+  return s+Math.random()*(hard?0.05:0.5);
+}
+function aiPlay(p){
+  const moves=availableMoves(p);
+  if(!moves.length){ endTurn(false); return; }
+  let best=null, bs=-Infinity;
+  for(const e of moves){
+    const s=scoreMove(p,e);
+    if(s>bs){ bs=s; best=e; }
+  }
+  doMove(p,best);
+}
+function doMove(p,e){
+  const {i,info}=e;
+  const wasBonus=BONUS>0;
+  if(e.j!==undefined) DUSED[e.j]=true;
+  if(wasBonus) BONUS=0;
+  PP[p][i]=info.to; LAST[p]=i; FIRST[p]=false;
+  if(info.dbl!==undefined) PP[p][info.dbl]=info.to;
+  let msg=null;
+  for(const [q,j] of info.caps){
+    PP[q][j]=-1;
+    msg=(msg?msg+' ':'')+'¡'+who(p)+' come a '+who(q)+'!';
+  }
+  if(teamOf(p).every(t=>PP[t].every(v=>v===GOAL))){
+    pOver=true; pPhase='over';
+    status(teamOf(p).includes(HUMAN)?'¡Gana tu equipo!':'Gana '+(RULES.p.parejas?'el equipo rival':NAMES[p]));
+    return;
+  }
+  if(!wasBonus && !RULES.p.dosDados){
+    let bon=0;
+    if(info.caps.length && RULES.p.bonus20) bon=20;
+    if(info.to===GOAL && RULES.p.bonus10) bon=10;
+    if(bon && legalP(p,bon).length){
+      BONUS=bon;
+      const txt='Premio de '+bon+' casillas';
+      if(p!==HUMAN){
+        pBusy=true; status(txt);
+        timer=setTimeout(()=>{ pBusy=false; aiPlay(p); },1200);
+      } else {
+        status((msg?msg+'. ':'')+txt+': toca una ficha.');
+      }
+      return;
+    }
+  }
+  nextStep(p,msg);
+}
+function nextStep(p,msg){
+  if(RULES.p.dosDados && DUSED.some(x=>!x) && availableMoves(p).length){
+    const left=DV[DUSED.indexOf(false)];
+    pPhase='move';
+    status((msg?msg+'. ':'')+'Te queda un dado: '+left);
+    if(p===HUMAN) autoOrWait(p);
+    if(p!==HUMAN){
+      pBusy=true;
+      timer=setTimeout(()=>{ pBusy=false; aiPlay(p); },1200);
+    }
+    return;
+  }
+  const dobles=RULES.p.dosDados && DV[0]===DV[1];
+  endTurn((RULES.p.repite6 && lastRoll===6)||dobles, msg);
+}
+function endTurn(extra,msg){
+  if(pOver) return;
+  if(!extra){ pTurn=(pTurn+1)%NP; SIX=0; }
+  pPhase='roll'; BONUS=0; DUSED=[false,false];
+  statusTurn(msg);
+  scheduleAI();
+}
+function clickP(x,y){
+  if(picking||pOver||pTurn!==HUMAN||pPhase!=='move'||pBusy) return;
+  const cs=cv.width/19;
+  const [bx,by]=toBoard(x,y);
+  for(const e of availableMoves(HUMAN)){
+    const [cx,cy]=centerOf(HUMAN,e.i);
+    if(Math.hypot(bx-cx*cs, by-cy*cs)<cs*.5){ doMove(HUMAN,e); return; }
+  }
+  if(RULES.p.capOblig && availableMoves(HUMAN).some(e=>e.info.caps.length)){
+    for(let i=0;i<4;i++){
+      const [cx,cy]=centerOf(HUMAN,i);
+      if(PP[HUMAN][i]>=0 && Math.hypot(bx-cx*cs, by-cy*cs)<cs*.5){ status(NAME+', estás obligado a matar: elige una ficha que coma'); return; }
+    }
+  }
+}
+
+/* ---------- dibujo ---------- */
+let dieKey='';
+function renderDice(){
+  const die=$('die');
+  const multi=RULES.p.dosDados && pRoll>0;
+  const key=[pRoll, multi?DV.join(','):'', multi].join('|');
+  if(key===dieKey) return;
+  dieKey=key;
+  die.innerHTML='';
+  die.style.display=multi?'flex':'grid';
+  die.style.gap=multi?'12px':'0';
+  die.style.width=multi?'auto':'96px';
+  die.style.background=multi?'transparent':'#fff';
+  die.style.boxShadow=multi?'none':die.style.boxShadow;
+  const values=multi?DV:[pRoll];
+  for(const v of values){
+    const box=multi?document.createElement('div'):die;
+    if(multi){ box.className='pips'; die.appendChild(box); }
+    for(let k=0;k<9;k++){
+      const d=document.createElement('i');
+      if((PAT[v]||[]).includes(k)) d.className='on';
+      box.appendChild(d);
+    }
+  }
+}
+function drawP(t){
+  if(mode!=='p') return;
+  const S=cv.width, cs=S/19;
+  const pulse=(Math.sin(t/260)+1)/2;
+  ctx.clearRect(0,0,S,S);
+
+  // madera
+  const wood=ctx.createLinearGradient(0,0,S,S);
+  wood.addColorStop(0,'#a9733c'); wood.addColorStop(1,'#5a3617');
+  ctx.fillStyle=wood; rr(0,0,S,S,cs*.4); ctx.fill();
+
+  // tablero girado: tu color queda abajo a la derecha
+  ctx.save();
+  ctx.translate(S/2,S/2); ctx.scale(1,TILT); ctx.rotate(-viewM()*Math.PI/2); ctx.translate(-S/2,-S/2);
+
+  // zonas de casa; se iluminan en el turno de su color
+  for(let p=0;p<NP;p++){
+    const pts=[[0,0],[8,0],[8,8],[0,8]].map(pt=>rotC(pt,p)).map(([x,y])=>[x*cs,y*cs]);
+    const active=!picking&&!pOver&&p===pTurn;
+    ctx.save();
+    if(active){ ctx.shadowColor=PCOL[p]; ctx.shadowBlur=18+14*pulse; }
+    ctx.globalAlpha=active?1:.85;
+    ctx.fillStyle=PCOL[p];
+    drawPath(pts); ctx.fill();
+    ctx.restore(); ctx.globalAlpha=1;
+  }
+
+  // anillo de 68 casillas
+  for(let k=0;k<RING;k++){
+    const [c,r]=ringXY(k);
+    const sp=START.indexOf(k);
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=9; ctx.shadowOffsetY=5;
+    ctx.fillStyle=sp>=0?PCOL[sp]:'#fff8e7';
+    rr(c*cs+2,r*cs+2,cs-4,cs-4,cs*.22); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle='rgba(120,90,50,.5)'; ctx.lineWidth=1;
+    rr(c*cs+2,r*cs+2,cs-4,cs-4,cs*.22); ctx.stroke();
+    if(SAFE.has(k)){
+      ctx.beginPath(); ctx.arc((c+.5)*cs,(r+.5)*cs,cs*.26,0,Math.PI*2);
+      ctx.fillStyle='#9e9e9e'; ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle='#5d4037'; ctx.stroke();
+    }
+  }
+
+  // columnas de meta (la 7 es la meta)
+  for(let p=0;p<NP;p++) for(let h=1;h<=7;h++){
+    const [c,r]=homeXY(p,h);
+    ctx.globalAlpha=h===7?.95:.6; ctx.fillStyle=PCOL[p];
+    rr(c*cs+3,r*cs+3,cs-6,cs-6,cs*.2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  // centro con triángulos de color
+  ctx.fillStyle='#fff8e1'; ctx.fillRect(8*cs,8*cs,3*cs,3*cs);
+  for(let p=0;p<NP;p++){
+    const pts=[[8,8],[11,8],[9.5,9.5]].map(pt=>rotC(pt,p)).map(([x,y])=>[x*cs,y*cs]);
+    ctx.fillStyle=PCOL[p];
+    drawPath(pts); ctx.fill();
+  }
+
+  // casillas de casa
+  for(let p=0;p<NP;p++) for(let i=0;i<4;i++){
+    const [c,r]=nestXY(p,i);
+    ctx.fillStyle='rgba(255,255,255,.7)';
+    ctx.beginPath(); ctx.arc((c+.5)*cs,(r+.5)*cs,cs*.85,0,Math.PI*2); ctx.fill();
+  }
+
+  // fichas
+  if(!picking&&PP){
+    const hl=(pTurn===HUMAN&&pPhase==='move'&&!pBusy&&!pOver)?availableMoves(HUMAN).map(e=>e.i):[];
+    for(let p=0;p<NP;p++) for(let i=0;i<4;i++){
+      const sl=pieceSlot(p,i);
+      const [cx,cy]=centerOf(p,i);
+      const x=cx*cs, y=cy*cs, r=cs*.36*sl[2];
+      if(p===HUMAN && hl.includes(i)){
+        ctx.beginPath(); ctx.arc(x,y,r+4+4*pulse,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,241,118,'+(.6+.4*pulse)+')'; ctx.fill();
+      }
+      ctx.save();
+      ctx.fillStyle='rgba(0,0,0,.35)';
+      ctx.beginPath(); ctx.ellipse(x+r*.2,y+r*.3,r*1.0,r*.72,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.45)';
+      ctx.beginPath(); ctx.arc(x,y+r*.38,r,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      const g=ctx.createRadialGradient(x-r*.3,y-r*.35,r*.05,x,y,r);
+      g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(.3,PCOL[p]); g.addColorStop(1,'rgba(0,0,0,.3)');
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+      ctx.lineWidth=2; ctx.strokeStyle='#fff';
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+
+  // botones y dado
+  const act=$('action');
+  if(picking){ act.disabled=true; }
+  else if(pOver){ act.textContent='Nueva partida'; act.disabled=false; act.onclick=startParchis; }
+  else {
+    act.onclick=rollP;
+    act.textContent=pPhase==='roll'?'🎲 Tirar':'🎲 '+(RULES.p.dosDados?DV.join(' + '):pRoll);
+    act.disabled=!(pTurn===HUMAN&&pPhase==='roll'&&!pBusy);
+  }
+  renderDice();
+  const die=$('die');
+  const canRoll=!picking&&!pOver&&pTurn===HUMAN&&pPhase==='roll'&&!pBusy;
+  die.onclick=canRoll?rollP:null;
+  die.style.opacity=canRoll?1:0.5;
+  if(!(RULES.p.dosDados && pRoll>0)) die.style.background=canRoll?'#fff':'#bdbdbd';
+  die.style.boxShadow=canRoll?`0 0 ${12+14*pulse}px #ffeb3b, 0 6px 0 #9e9e9e`:'0 6px 0 #9e9e9e';
+  $('status').style.color=(!picking&&pTurn===HUMAN)?'#ffeb3b':'#fff';
+}
+
+/* ================= bucle de animación ================= */
+function loop(t){
+  if(mode==='p') drawP(t);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+
+<!-- botón para volver al menú de apps (añadido) -->
+<a href="./" id="vpHome" aria-label="Volver al menú de apps" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483647;width:42px;height:42px;border-radius:50%;background:#7b5a3cD9;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font:600 20px/1 system-ui,sans-serif;box-shadow:0 2px 10px #0006">⌂</a>
+</body>
+</html>
