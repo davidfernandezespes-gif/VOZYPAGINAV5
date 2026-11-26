@@ -351,8 +351,8 @@ const VOICE_STYLES = {
   natural: { label: 'Natural', scales: null },
   serena: { label: 'Serena · para dormir', scales: [0.45, 1.08, 0.55] },
   clara: { label: 'Clara · para el coche', scales: [0.55, 0.98, 0.7] },
-  viva: { label: 'Expresiva', scales: [0.8, 1, 1], dyn: 1 },
-  intensa: { label: 'Muy expresiva', scales: [0.95, 0.97, 1.15], dyn: 1.6 }
+  viva: { label: 'Expresiva', scales: [0.75, 1, 0.95], dyn: 1 },
+  intensa: { label: 'Muy expresiva', scales: [0.8, 0.98, 1], dyn: 1.8 }
 };
 const PIPER_HF = ['https://huggingface.co/rhasspy/piper-voices/resolve/main/', 'https://huggingface.co/diffusionstudio/piper-voices/resolve/main/'];
 const piperPath = model => { const [loc, name, q] = model.split('-'); return `${loc.split('_')[0]}/${loc}/${name}/${q}/${model}.onnx`; };
@@ -814,7 +814,7 @@ async function openBook(id, autoplay = false) {
   if (autoplay) play();
 }
 function backToLibrary() {
-  pause(); $('readerView').classList.add('hidden'); $('libraryView').classList.remove('hidden'); renderLibrary();
+  pause('volver a la biblioteca'); $('readerView').classList.add('hidden'); $('libraryView').classList.remove('hidden'); renderLibrary();
 }
 $('backToLib').onclick = () => { if (history.state && history.state.reader) history.back(); else backToLibrary(); };
 window.addEventListener('popstate', () => { if (!$('readerView').classList.contains('hidden')) { if (document.querySelector('.sheet.show')) { closeSheets(); history.pushState({ reader: true }, ''); } else backToLibrary(); } });
@@ -900,22 +900,35 @@ function play() {
   } else audioStart(state.s);
   bgSound.start();
 }
-function pause() {
+// Registro de paradas: por qué se paró cada vez (se ve en Ajustes → Diagnóstico)
+function noteStop(why) {
+  try {
+    const l = JSON.parse(localStorage.getItem('vp-stops') || '[]');
+    l.push(new Date().toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + ' · ' + why + (document.hidden ? ' (pantalla apagada)' : ''));
+    while (l.length > 12) l.shift();
+    localStorage.setItem('vp-stops', JSON.stringify(l));
+  } catch (e) {}
+}
+function pause(why = 'botón de pausa') {
   if (!state.playing && !state.loading) return;
+  noteStop(why);
   state.playing = false; setLoading(false);
   pauseAudio();
-  setPlayIcon(); setStatus('En pausa'); saveMeta(true); bgSound.stop();
+  setPlayIcon(); setStatus(why === 'botón de pausa' ? 'En pausa' : 'En pausa · ' + why); saveMeta(true); bgSound.stop();
+  aliveBeat();
 }
+function aliveBeat() { try { localStorage.setItem('vp-alive', JSON.stringify({ playing: state.playing, t: Date.now() })); } catch (e) {} }
+setInterval(() => { if (state.playing) aliveBeat(); }, 5000);
 function stopAll() {
   state.token++; state.playing = false; state.loading = false; state.current = null; cancelPrefetch();
   try { pauseAudio(); audio.removeAttribute('src'); audio.load(); } catch (e) {}
   setPlayIcon(); bgSound.stop();
 }
 function playFailed(err) {
-  console.warn(err); state.playing = false; setLoading(false); setPlayIcon();
+  console.warn(err); noteStop('el navegador no dejó reproducir (' + ((err && err.name) || 'error') + ')'); state.playing = false; setLoading(false); setPlayIcon();
   setStatus('Toca ▶ para continuar', false);
 }
-$('play').onclick = () => state.playing ? pause() : play();
+$('play').onclick = () => state.playing ? pause('botón de pausa') : play();
 
 // Saltar a una frase concreta (desde el texto, la barra o los botones)
 function jumpTo(i, keepPlaying = state.playing) {
@@ -937,7 +950,7 @@ function jumpChapter(ch, keepPlaying = state.playing) {
   if (keepPlaying) play(); else { state.playing = false; setPlayIcon(); }
 }
 function onChapterFinished() {
-  if (timer.mode === 'chapter') { timer.clear(); pause(); setStatus('Temporizador: fin del capítulo'); return true; }
+  if (timer.mode === 'chapter') { timer.clear(); pause('temporizador (fin del capítulo)'); setStatus('Temporizador: fin del capítulo'); return true; }
   if (state.meta) { deletePrepared(state.meta.id + '|' + state.ch + '|'); setTimeout(() => prepareVoice(false), 2000); } // ya escuchado: liberar espacio y seguir guardando
   if (state.ch < state.chapters.length - 1) { loadChapter(state.ch + 1, 0); $('textScroll').scrollTop = 0; return false; }
   state.playing = false; setPlayIcon(); setStatus('Has terminado el libro 🎉'); bgSound.stop(); return true;
@@ -1013,7 +1026,7 @@ function isGridChunk(c) { const g = gridChunkContaining(c.ch, c.start); return g
 function makeRoom(need) {
   if (!state.meta || preparedBytes + need <= PREP_LIMIT) return true;
   const voice = voiceTag(), id = state.meta.id;
-  const score = k => { const [b, ch, , v] = k.split('|'); return b !== id ? 0 : v.replace(/~n1$/, '') !== voice ? 1 : +ch < state.ch ? 2 : 9; };
+  const score = k => { const [b, ch, , v] = k.split('|'); return b !== id ? 0 : v.replace(/~m2/, '').replace(/~n1$/, '') !== voice ? 1 : +ch < state.ch ? 2 : 9; };
   const cands = [...preparedKeys].map(k => [score(k), k]).filter(x => x[0] < 9).sort((a, b) => a[0] - b[0]);
   for (const [, k] of cands) {
     if (preparedBytes + need <= PREP_LIMIT) break;
@@ -1060,7 +1073,7 @@ function piperVoice() { return PIPER_VOICES.find(v => v.id === settings.get('pVo
 function voiceLabel() { return 'Voz ' + piperVoice().label.split(' · ')[0].toLowerCase(); }
 function voiceStyle() { return VOICE_STYLES[settings.get('vStyle')] ? settings.get('vStyle') : 'natural'; }
 function voiceTag() { const st = voiceStyle(); return settings.get('pVoice') + (st === 'natural' ? '' : '~' + st) + (typeof dictTag === 'string' ? dictTag : ''); }
-function cacheKey(c) { return 'p|' + voiceTag() + (hasNames(c.text) ? '~n1' : '') + '|' + c.text; } // ~n1: trozo con nombres ingleses corregidos
+function cacheKey(c) { return 'p|' + voiceTag() + (VOICE_STYLES[voiceStyle()].dyn ? '~m2' : '') + (hasNames(c.text) ? '~n1' : '') + '|' + c.text; } // ~n1: trozo con nombres ingleses corregidos
 // silencio en WAV (para saltar un trozo que no se pudo generar)
 function silenceWav(sec, rate = 16000) {
   const n = Math.round(sec * rate), buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
@@ -1154,14 +1167,38 @@ function acting(m, i, inf, pitch) {
     if (k.dlg) { ls *= 1 - 0.04 * d; ns += 0.06 * d; }
     if (k.dots) { ls *= 1 + 0.08 * d; ns -= 0.05 * d; }
     if (k.short && !k.exc) ls *= 1 + 0.03 * d;
-    ns = Math.min(1.1, Math.max(0.3, ns)); nw = Math.min(1.4, Math.max(0.3, nw));
+    ns = Math.min(0.95, Math.max(0.3, ns)); nw = Math.min(1.15, Math.max(0.3, nw)); // más allá, la voz se traba
   }
-  return [ns, ls * pitch, nw];
+  return [ns, ls * pitch * melodyMean(m, i), nw];
+}
+// MELODÍA: la voz se genera un poco más lenta y luego se acelera justo lo mismo; así se sube o se baja
+// el tono sin cambiar la velocidad, y se puede dibujar una curva (subir al final de una pregunta,
+// caer al final de una afirmación, tono alto en las exclamaciones…).
+function melody(m, i) {
+  const d = m.dyn || 0; if (!d) return null;
+  const t = m.sentences[i] || '', k = kindOf(t);
+  let h = 0; for (let j = 0; j < t.length; j++) h = (h * 31 + t.charCodeAt(j)) | 0;
+  const wob = ((h >>> 0) % 1000 / 1000 - 0.5) * 0.06 * d; // cada frase con su propio tono, como al hablar
+  let base = 1 + wob, endTo = 0, endFrom = 0.7;
+  if (k.exc) base += 0.09 * d;
+  else if (k.dots) base -= 0.06 * d;
+  if (k.dlg) base += 0.04 * d;
+  if (k.q) { endTo = 0.16 * d; endFrom = 0.55; }   // pregunta: sube al final
+  else if (k.exc) { endTo = -0.05 * d; endFrom = 0.6; }
+  else { endTo = -0.07 * d; endFrom = 0.65; }      // afirmación: cae al final
+  return x => base + (x > endFrom ? endTo * Math.pow((x - endFrom) / (1 - endFrom), 1.4) : 0);
+}
+function melodyMean(m, i) { const f = melody(m, i); if (!f) return 1; let s = 0; for (let j = 0; j < 20; j++) s += f((j + 0.5) / 20); return s / 20; }
+function applyMelody(a, f) {
+  if (!f) return a;
+  const n = a.length, out = new Float32Array(Math.ceil(n / 0.6)); let p = 0, o = 0;
+  while (p < n - 1 && o < out.length) { const i0 = p | 0, fr = p - i0; out[o++] = a[i0] * (1 - fr) + a[i0 + 1] * fr; p += f(p / n); }
+  return out.subarray(0, o);
 }
 function loudOf(t, d) { const k = kindOf(t || ''); return k.exc ? 1 + 0.12 * d : k.dots ? 1 - 0.1 * d : 1; }
 function polish(a, sr, vol = 1) {
   const n = a.length; if (n < sr * 0.05) return a;
-  const win = Math.round(sr * 0.01), thr = 0.015, margin = Math.round(sr * 0.03);
+  const win = Math.round(sr * 0.01), thr = 0.008, margin = Math.round(sr * 0.06);
   const loud = i => { let m = 0; for (let k = i; k < Math.min(n, i + win); k++) m = Math.max(m, Math.abs(a[k])); return m > thr; };
   let s0 = 0; while (s0 < n - win && !loud(s0)) s0 += win;
   let s1 = n - win; while (s1 > s0 && !loud(s1)) s1 -= win;
@@ -1202,7 +1239,7 @@ async function speak(m) {
       };
       if (useSid) feeds.sid = new ort.Tensor('int64', BigInt64Array.from([BigInt(sid)]), [1]);
       const out = await session.run(feeds);
-      const a = polish(out[session.outputNames[0]].data, sr, m.dyn ? loudOf(m.sentences[i], m.dyn) : 1);
+      const a = polish(applyMelody(out[session.outputNames[0]].data, melody(m, i)), sr, m.dyn ? loudOf(m.sentences[i], m.dyn) : 1);
       parts.push(a); total += a.length;
     }
     const gap = Math.round(sr * (m.pauses[i] ?? 0.22));
@@ -1288,6 +1325,9 @@ const piper = {
       if (w.busy || !w.isReady) continue;
       if (!this.queue.length) return;
       this.queue.sort((a, b) => a.ref.prio - b.ref.prio || a.seq - b.seq);
+      // al escuchar, como mucho 2 generando por delante: deja CPU libre para que el sonido no se trabe
+      // (lo urgente, el trozo que tiene que sonar ya, pasa siempre)
+      if (state.playing && this.queue[0].ref.prio > 0 && this.workers.filter(x => x.busy).length >= 2) return;
       const job = this.queue.shift();
       w.busy = true;
       const t0 = performance.now();
@@ -1682,7 +1722,21 @@ audio.addEventListener('timeupdate', () => {
   const i = c.start + k; if (i !== state.s) highlight(i);
   updatePositionState();
 });
-audio.addEventListener('pause', () => { if (state.playing && !audio.ended && !state.loading && audio.currentTime > 0 && document.hidden === false) { /* pausa del sistema (llamada, auriculares) */ state.playing = false; setPlayIcon(); setStatus('En pausa'); saveMeta(true); } });
+// Si el móvil detiene el sonido por su cuenta, la app NO se da por parada: vuelve a sonar sola
+// (solo la paras tú con el botón). Se anota en el registro para poder ver qué pasó.
+audio.addEventListener('pause', () => {
+  if (state.playing && !audio.ended && !state.loading && audio.currentTime > 0 && Date.now() - ownPauseAt > 1500) noteStop('el móvil cortó el sonido: reanudando');
+});
+let pausedSince = 0, lastResume = 0;
+setInterval(() => {
+  const stuck = state.playing && !state.loading && state.current && audio.src && audio.paused && !audio.ended && Date.now() - ownPauseAt > 2500;
+  if (!stuck) { pausedSince = 0; return; }
+  if (!pausedSince) { pausedSince = Date.now(); return; }
+  if (Date.now() - pausedSince > 1500 && Date.now() - lastResume > 4000) {
+    lastResume = Date.now();
+    audio.play().then(() => setStatus(voiceLabel())).catch(() => {});
+  }
+}, 1000);
 audio.addEventListener('play', () => { if (!state.playing) { state.playing = true; setPlayIcon(); setStatus(voiceLabel()); } });
 
 /* ================= TEMPORIZADOR ================= */
@@ -1720,7 +1774,7 @@ async function fadeAndPause() {
   if (timer.fading) return; timer.fading = true;
   // baja el volumen poco a poco durante unos 10 segundos
   if (!audio.paused) { for (let v = 1; v > 0; v -= 0.05) { audio.volume = Math.max(0, v); bgSound.duck(v); await sleep(500); if (!state.playing) break; } }
-  pause(); audio.volume = 1; bgSound.duck(1); timer.fading = false;
+  pause('temporizador'); audio.volume = 1; bgSound.duck(1); timer.fading = false;
   rewindAfterSleep();
   const mins = +(settings.get('rewindMin') ?? 2);
   setStatus('Temporizador terminado · buenas noches' + (mins ? ` · retrocedido ${mins} min` : ''));
@@ -1773,7 +1827,8 @@ function renderDiag() {
     'Velocidad de generación: ' + (piper.rtf == null ? 'aún sin medir' : (piper.rtf / Math.max(1, piper.workers.length)).toFixed(2) + '× (menos de 1 = va bien)'),
     'Audio preparado por delante: ' + (c ? Math.round(readyAhead(c)) + ' s' : '—'),
     'Abierta en: ' + (inPreview ? 'vista previa (no funciona aquí)' : location.protocol),
-    'Errores: ' + (piper.errors.length ? '\n  ' + piper.errors.join('\n  ') : 'ninguno')
+    'Errores: ' + (piper.errors.length ? '\n  ' + piper.errors.join('\n  ') : 'ninguno'),
+    'Últimas paradas:' + (() => { try { const l = JSON.parse(localStorage.getItem('vp-stops') || '[]'); return l.length ? '\n  ' + l.slice().reverse().join('\n  ') : ' ninguna'; } catch (e) { return ' —'; } })()
   ].join('\n');
 }
 setInterval(() => { if ($('settingsSheet').classList.contains('show')) renderDiag(); }, 2000);
@@ -1906,7 +1961,7 @@ function updatePositionState() {
 }
 if ('mediaSession' in navigator) {
   const h = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) {} };
-  h('play', () => play()); h('pause', () => pause());
+  h('play', () => play()); h('pause', () => pause('pausa desde el móvil, auriculares o coche'));
   h('seekbackward', () => skip(-1)); h('seekforward', () => skip(1));
   h('previoustrack', () => skip(-1)); h('nexttrack', () => skip(1));
 }
@@ -2174,7 +2229,7 @@ $('carChip').onclick = async () => {
 };
 $('carExit').onclick = () => { $('carView').classList.add('hidden'); clearInterval(carIv); try { carLock?.release(); } catch (e) {} carLock = null; };
 document.addEventListener('visibilitychange', async () => { if (!document.hidden && !$('carView').classList.contains('hidden')) { try { carLock = await navigator.wakeLock?.request('screen'); } catch (e) {} } });
-$('carPlay').onclick = () => { state.playing ? pause() : play(); setTimeout(renderCar, 50); };
+$('carPlay').onclick = () => { state.playing ? pause('botón de pausa (modo coche)') : play(); setTimeout(renderCar, 50); };
 $('carBack').onclick = () => { skipSecs(-30); renderCar(); };
 $('carFwd').onclick = () => { skipSecs(30); renderCar(); };
 $('carNext').onclick = () => { jumpChapter(state.ch + 1); renderCar(); };
@@ -2186,6 +2241,15 @@ if (!PIPER_VOICES.some(v => v.id === settings.get('pVoice'))) { settings.set('pV
 for (const m of ['es_MX-claude-high', 'es_MX-ald-medium', 'es_ES-mls_10246-low', 'es_ES-mls_9972-low', 'es_ES-davefx-medium']) db.del('models', m).catch(() => {});
 // preparar la voz nada más abrir la app (si ya está descargada), así al tocar un libro arranca al momento
 piper.isDownloaded(piperVoice().model).then(ok => { if (ok) setTimeout(() => piper.ensure(piperVoice()).catch(() => {}), 400); }).catch(() => {});
+// ¿se cerró la app sola mientras sonaba? (el móvil la cierra si le falta memoria)
+try {
+  const al = JSON.parse(localStorage.getItem('vp-alive') || 'null');
+  if (al && al.playing && Date.now() - al.t < 120000) {
+    noteStop('la app se cerró sola mientras sonaba (el móvil la cerró, seguramente por memoria)');
+    piper.memCap = Math.max(2, Math.min(piper.memCap, 3)); try { localStorage.setItem('vp-memcap', piper.memCap); } catch (e) {}
+  }
+  localStorage.setItem('vp-alive', JSON.stringify({ playing: false, t: Date.now() }));
+} catch (e) {}
 const inPreview = (() => { try { return window.top !== window.self; } catch (e) { return true; } })();
 if (inPreview) $('previewWarn').classList.remove('hidden');
 refreshSettingsUI();
