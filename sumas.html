@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sumas Numéricas</title>
+<style>
+:root{--blue:#2f86eb;--blue-d:#1d5fb8;--ink:#2c3e5c;--muted:#8a9bb5;--bg:#f5f8fc;--ok:#22c55e;--bad:#ef4444;--line:#dbe4f0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;justify-content:flex-end;gap:8px;padding:14px 18px 0}
+.icon-btn{background:none;border:0;width:44px;height:44px;border-radius:50%;font-size:24px;cursor:pointer;display:grid;place-items:center}
+.icon-btn:active{background:#e6effc}
+main{flex:1;overflow:auto;padding:12px 20px 24px;display:flex;flex-direction:column;align-items:center}
+.view{display:none;width:100%;max-width:420px;flex-direction:column;align-items:center}
+.view.active{display:flex}
+.daily-card{width:100%;max-width:260px;margin-top:12px;background:linear-gradient(#4a97ec,#1a58ab);color:#fff;border-radius:22px;padding:26px 20px;text-align:center;box-shadow:0 14px 30px rgba(30,90,170,.35)}
+.cal{font-size:44px;line-height:1}
+.lbl{margin-top:14px;font-size:13px;letter-spacing:.06em;opacity:.8}
+.date{margin:8px 0 18px;font-size:20px;font-weight:700}
+.pill{background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:24px;padding:10px 34px;font-size:18px;font-weight:700;cursor:pointer}
+.title{margin-top:auto;padding-top:40px;font-size:34px;font-weight:800;text-align:center}
+.sub{margin-top:8px;color:var(--muted);text-align:center;font-size:15px;line-height:1.4;max-width:300px}
+.big{margin:auto 0 0;width:100%;max-width:360px;background:var(--blue);color:#fff;border:0;border-radius:30px;padding:16px 0;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 8px 18px rgba(47,134,235,.35)}
+.big:active{background:var(--blue-d)}
+.big.sm{box-shadow:none;margin-top:14px;padding:12px 0;font-size:17px}
+.ghost{margin-top:10px;width:100%;background:#fff;color:var(--blue);border:2px solid var(--line);border-radius:30px;padding:12px 0;font-size:16px;font-weight:700;cursor:pointer}
+#home .big{margin-top:auto;margin-bottom:20px}
+#daily h2{margin-top:8px;font-size:26px}
+#daily .streak{margin:8px 0 16px;color:var(--muted)}
+.list{width:100%;margin-bottom:16px}
+.item{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;text-transform:capitalize}
+.item b{color:var(--muted)}
+.item.done b{color:var(--ok)}
+#daily .big{margin-top:auto}
+nav{display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:0;padding:10px 0 14px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer}
+nav button.on{color:var(--blue)}
+nav button span{display:block;font-size:24px;margin-bottom:2px}
+/* game */
+.ghead{width:100%;display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.ghead #gameTitle{font-size:18px;font-weight:700}
+#timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--muted);min-width:52px;text-align:right}
+.board{margin-top:22px;display:grid;justify-content:center}
+.tgt{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;font-size:17px;line-height:1.1;background:#e4ecf8;border-radius:12px;transition:background .2s,color .2s}
+.tgt small{font-size:12px;font-weight:600;opacity:.85;margin-top:2px}
+.tgt.ok{background:var(--ok);color:#fff}
+.tgt.over{background:var(--bad);color:#fff}
+.cell{aspect-ratio:1;width:100%;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:20px;font-weight:700;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0;transition:background .15s}
+.cell.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.cell.ex{background:#eef2f7;border-color:#eef2f7;color:#b5c0d0;text-decoration:line-through}
+.hint{margin-top:20px;color:var(--muted);font-size:14px;text-align:center;line-height:1.4}
+#game .ghost{margin-top:auto;max-width:360px}
+.lives{margin-top:10px;font-size:20px;letter-spacing:2px;min-height:26px}
+.tools{display:flex;gap:8px;width:100%;max-width:360px;margin-top:auto}
+.tool{flex:1;background:#fff;color:var(--blue);border:2px solid var(--line);border-radius:20px;padding:12px 0;font-size:15px;font-weight:700;cursor:pointer}
+.tool.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.cell.bad{animation:shake .4s;background:var(--bad);border-color:var(--bad);color:#fff}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#game{min-height:100%}
+/* modals */
+.modal{position:fixed;inset:0;background:rgba(20,35,60,.45);display:none;place-items:center;padding:20px;z-index:10}
+.modal.open{display:grid}
+.sheet{background:#fff;border-radius:22px;padding:24px;width:100%;max-width:340px;text-align:center}
+.sheet h3{font-size:22px;margin-bottom:10px}
+.sheet p{margin:6px 0;line-height:1.5}
+.best{list-style:none;margin:8px 0;text-align:left;max-height:180px;overflow:auto}
+.best li{padding:6px 0;border-bottom:1px solid var(--line)}
+.setting{display:flex;justify-content:space-between;align-items:center;padding:12px 0;font-size:17px}
+.setting input{width:22px;height:22px;accent-color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <button class="icon-btn" id="trophy" aria-label="Estadísticas">🏆</button>
+  <button class="icon-btn" id="gear" aria-label="Ajustes">⚙️</button>
+</header>
+
+<main>
+  <section class="view active" id="home">
+    <div class="daily-card">
+      <div class="cal">📅</div>
+      <div class="lbl">DESAFÍO DIARIO</div>
+      <div class="date" id="dailyDate"></div>
+      <button class="pill" id="dailyBtn">Jugar</button>
+    </div>
+    <h1 class="title">Sumas Numéricas</h1>
+    <p class="sub">Marca casillas para que cada fila y columna sume su total.</p>
+    <button class="big" id="levelBtn">Nivel 1</button>
+  </section>
+
+  <section class="view" id="daily">
+    <h2>Desafíos diarios</h2>
+    <p class="streak">Racha: <b id="streak">0</b> días</p>
+    <div class="list" id="week"></div>
+    <button class="big" id="dailyPlay">Jugar desafío de hoy</button>
+  </section>
+
+  <section class="view" id="game">
+    <div class="ghead">
+      <button class="icon-btn" id="back" aria-label="Volver">‹</button>
+      <div id="gameTitle"></div>
+      <div id="timer">0:00</div>
+    </div>
+    <div class="lives" id="lives"></div>
+    <div class="board" id="board"></div>
+    <p class="hint">Elige una herramienta. ✓ Marcar suma la casilla (vuelve a tocarla para quitarla). ✕ Descartar tacha las que no van. Si te pasas del total pierdes una vida.</p>
+    <div class="tools">
+      <button class="tool" id="modeMark">✓ Marcar</button>
+      <button class="tool" id="modeErase">✕ Descartar</button>
+      <button class="tool" id="clear">Limpiar</button>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button data-v="home" class="on"><span>🏠</span>Inicio</button>
+  <button data-v="daily"><span>📅</span>Desafíos diarios</button>
+</nav>
+
+<div class="modal" id="stats"><div class="sheet">
+  <h3>Tus estadísticas</h3>
+  <div id="statsBody"></div>
+  <button class="big sm" data-close="stats">Cerrar</button>
+</div></div>
+
+<div class="modal" id="settings"><div class="sheet">
+  <h3>Ajustes</h3>
+  <label class="setting"><span>Sonido</span><input type="checkbox" id="sound"></label>
+  <button class="ghost" id="reset">Borrar progreso</button>
+  <button class="big sm" data-close="settings">Cerrar</button>
+</div></div>
+
+<div class="modal" id="win"><div class="sheet">
+  <h3 id="winTitle"></h3>
+  <p id="winInfo"></p>
+  <button class="big sm" id="nextBtn">Siguiente nivel</button>
+  <button class="ghost" id="winHome">Inicio</button>
+</div></div>
+
+<div class="modal" id="over"><div class="sheet">
+  <h3>Sin vidas</h3>
+  <p>Te has equivocado tres veces.</p>
+  <button class="big sm" id="retry">Reintentar</button>
+  <button class="ghost" id="overHome">Inicio</button>
+</div></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const KEY = 'sumas-numericas-v1';
+const DEF = { level: 1, wins: 0, best: {}, daily: {}, sound: true };
+let data = load();
+let G = null, timer = null, ac = null, mode = null;
+
+function load(){
+  try { return { ...DEF, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; }
+  catch(e){ return { ...DEF }; }
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e){} }
+
+// PRNG determinista (mismo puzzle para el mismo nivel o día)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function dayKey(d = new Date()){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function sizeFor(level){ return Math.min(3 + Math.floor((level - 1) / 3), 7); }
+function fmt(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+function makePuzzle(n, seed){
+  const r = mulberry32(seed);
+  const g = [...Array(n)].map(() => [...Array(n)].map(() => 1 + Math.floor(r() * 9)));
+  const m = [...Array(n)].map(() => [...Array(n)].map(() => r() < 0.5));
+  for (let i = 0; i < n; i++) if (!m[i].some(Boolean)) m[i][Math.floor(r() * n)] = true;
+  for (let j = 0; j < n; j++) if (!m.some(row => row[j])) m[Math.floor(r() * n)][j] = true;
+  const rowT = Array(n).fill(0), colT = Array(n).fill(0);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+    if (m[i][j]) { rowT[i] += g[i][j]; colT[j] += g[i][j]; }
+  return { n, g, rowT, colT };
+}
+
+function beep(f = 660, d = 0.1){
+  if (!data.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), gn = ac.createGain();
+    o.frequency.value = f; gn.gain.value = 0.08;
+    o.connect(gn); gn.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + d);
+  } catch(e){}
+}
+
+function streak(){
+  let s = 0; const d = new Date();
+  if (!data.daily[dayKey(d)]) d.setDate(d.getDate() - 1);
+  while (data.daily[dayKey(d)]) { s++; d.setDate(d.getDate() - 1); }
+  return s;
+}
+
+function show(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === name));
+  document.querySelector('nav').style.display = name === 'game' ? 'none' : 'flex';
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.v === name));
+  if (name === 'home') renderHome();
+  if (name === 'daily') renderDaily();
+}
+
+function renderHome(){
+  $('#dailyDate').textContent = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+  $('#dailyBtn').textContent = data.daily[dayKey()] ? 'Completado ✓' : 'Jugar';
+  $('#levelBtn').textContent = 'Nivel ' + data.level;
+}
+
+function renderDaily(){
+  const list = $('#week'); list.innerHTML = '';
+  for (let k = 0; k < 14; k++){
+    const d = new Date(); d.setDate(d.getDate() - k);
+    const key = dayKey(d), done = !!data.daily[key];
+    const el = document.createElement('div');
+    el.className = 'item' + (done ? ' done' : '');
+    const label = k === 0 ? 'Hoy' : d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+    el.innerHTML = '<span></span><b>' + (done ? '✓' : '—') + '</b>';
+    el.firstChild.textContent = label;
+    list.appendChild(el);
+  }
+  $('#streak').textContent = streak();
+  $('#dailyPlay').textContent = data.daily[dayKey()] ? 'Volver a jugar' : 'Jugar desafío de hoy';
+}
+
+function openModal(id){ $('#' + id).classList.add('open'); }
+function closeModal(id){ $('#' + id).classList.remove('open'); }
+
+function openStats(){
+  const best = Object.entries(data.best).sort((a, b) => a[0] - b[0]).slice(-10)
+    .map(([l, s]) => '<li>Nivel ' + l + ': ' + fmt(s) + '</li>').join('');
+  $('#statsBody').innerHTML =
+    '<p>Niveles superados: <b>' + (data.level - 1) + '</b></p>' +
+    '<p>Puzzles resueltos: <b>' + data.wins + '</b></p>' +
+    '<p>Racha diaria: <b>' + streak() + '</b> días</p>' +
+    '<p style="margin-top:12px;font-weight:700">Mejores tiempos</p>' +
+    '<ul class="best">' + (best || '<li>Aún no hay tiempos</li>') + '</ul>';
+  openModal('stats');
+}
+
+// ---------- juego ----------
+function base(puz){
+  return { puz, sel: puz.g.map(r => r.map(() => 0)), cells: [], moves: 0, t0: Date.now(), done: false, lives: 3, over: false };
+}
+function startLevel(level){
+  G = { ...base(makePuzzle(sizeFor(level), level * 7919 + 13)), level, daily: false, title: 'Nivel ' + level };
+  begin();
+}
+function startDaily(){
+  const key = dayKey();
+  G = { ...base(makePuzzle(5, hash(key))), daily: true, key, title: 'Desafío diario' };
+  begin();
+}
+function begin(){
+  clearInterval(timer);
+  $('#gameTitle').textContent = G.title;
+  show('game');
+  mode = null; syncMode(); hearts();
+  build();
+  update();
+  tick();
+  timer = setInterval(tick, 250);
+}
+function tick(){
+  if (!G || G.done) return;
+  $('#timer').textContent = fmt(Math.floor((Date.now() - G.t0) / 1000));
+}
+
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function build(){
+  const { n, rowT, colT, g } = G.puz;
+  const board = $('#board');
+  const gap = 6;
+  const W = Math.min(innerWidth, 420) - 40;
+  const cs = Math.min(76, Math.floor((W - n * gap) / (n + 1)));
+  board.style.gridTemplateColumns = `repeat(${n + 1}, ${cs}px)`;
+  board.style.gap = gap + 'px';
+  board.innerHTML = '';
+  board.append(el('div'));
+  for (let j = 0; j < n; j++){ board.append(tgt(colT[j], 'c' + j)); }
+  G.cells = [];
+  for (let i = 0; i < n; i++){
+    board.append(tgt(rowT[i], 'r' + i));
+    G.cells[i] = [];
+    for (let j = 0; j < n; j++){
+      const b = el('button', 'cell', g[i][j]);
+      b.dataset.i = i; b.dataset.j = j;
+      G.cells[i][j] = b;
+      board.append(b);
+    }
+  }
+}
+
+function st(sum, target){ return sum === target ? 'ok' : sum > target ? 'over' : ''; }
+function tgt(target, id){ const t = el('div', 'tgt'); t.id = id; t.innerHTML = '<b>' + target + '</b><small>0</small>'; return t; }
+function paint(id, sum, target){ const t = $('#' + id); t.className = 'tgt ' + st(sum, target); t.querySelector('small').textContent = sum; }
+
+function update(){
+  const { n, g, rowT, colT } = G.puz;
+  const rs = Array(n).fill(0), cs = Array(n).fill(0);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){
+    const s = G.sel[i][j];
+    G.cells[i][j].className = 'cell' + (s === 1 ? ' sel' : s === 2 ? ' ex' : '');
+    if (s === 1){ rs[i] += g[i][j]; cs[j] += g[i][j]; }
+  }
+  let all = true;
+  for (let i = 0; i < n; i++){
+    paint('r' + i, rs[i], rowT[i]);
+    if (rs[i] !== rowT[i]) all = false;
+  }
+  for (let j = 0; j < n; j++){
+    paint('c' + j, cs[j], colT[j]);
+    if (cs[j] !== colT[j]) all = false;
+  }
+  if (all) win();
+}
+
+function win(){
+  if (G.done) return;
+  G.done = true;
+  clearInterval(timer);
+  const secs = Math.round((Date.now() - G.t0) / 1000);
+  data.wins++;
+  if (G.daily){
+    data.daily[G.key] = true;
+  } else {
+    if (G.level >= data.level) data.level = G.level + 1;
+    if (!data.best[G.level] || secs < data.best[G.level]) data.best[G.level] = secs;
+  }
+  save();
+  beep(880, 0.15);
+  setTimeout(() => beep(1320, 0.2), 160);
+  $('#winTitle').textContent = G.daily ? '¡Desafío de hoy completado!' : '¡Nivel ' + G.level + ' superado!';
+  $('#winInfo').textContent = 'Tiempo: ' + fmt(secs) + ' · Movimientos: ' + G.moves;
+  $('#nextBtn').style.display = G.daily ? 'none' : '';
+  openModal('win');
+}
+
+function overshoot(){
+  const { n, g, rowT, colT } = G.puz;
+  const rs = Array(n).fill(0), cs = Array(n).fill(0);
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+    if (G.sel[i][j] === 1){ rs[i] += g[i][j]; cs[j] += g[i][j]; }
+  return rs.some((v, i) => v > rowT[i]) || cs.some((v, j) => v > colT[j]);
+}
+function loseLife(cell){
+  G.lives--;
+  hearts();
+  beep(180, 0.3);
+  cell.className = 'cell bad';
+  setTimeout(() => { if (G && !G.done) update(); }, 400);
+  if (G.lives <= 0){
+    G.over = true;
+    clearInterval(timer);
+    openModal('over');
+  }
+}
+function syncMode(){
+  $('#modeMark').classList.toggle('on', mode === 'mark');
+  $('#modeErase').classList.toggle('on', mode === 'erase');
+}
+function setMode(m){ mode = mode === m ? null : m; syncMode(); }
+function hearts(){ $('#lives').textContent = '❤️'.repeat(G.lives) + '🤍'.repeat(3 - G.lives); }
+
+// ---------- eventos ----------
+$('#board').addEventListener('click', e => {
+  const b = e.target.closest('.cell');
+  if (!b || !G || G.done || G.over) return;
+  if (!mode) return;
+  const i = +b.dataset.i, j = +b.dataset.j;
+  if (mode === 'mark'){
+    if (G.sel[i][j] === 1){ G.sel[i][j] = 0; }
+    else {
+      G.sel[i][j] = 1;
+      if (overshoot()){ G.sel[i][j] = 0; loseLife(b); return; }
+    }
+  } else {
+    G.sel[i][j] = G.sel[i][j] === 2 ? 0 : 2;
+  }
+  G.moves++;
+  beep(520, 0.04);
+  update();
+});
+$('#clear').onclick = () => {
+  if (!G || G.done || G.over) return;
+  G.sel = G.puz.g.map(r => r.map(() => 0));
+  update();
+};
+$('#back').onclick = () => show('home');
+$('#modeMark').onclick = () => setMode('mark');
+$('#modeErase').onclick = () => setMode('erase');
+$('#levelBtn').onclick = () => startLevel(data.level);
+$('#dailyBtn').onclick = startDaily;
+$('#dailyPlay').onclick = startDaily;
+$('#trophy').onclick = openStats;
+$('#gear').onclick = () => {
+  $('#sound').checked = data.sound;
+  const r = $('#reset'); r.textContent = 'Borrar progreso'; delete r.dataset.armed;
+  openModal('settings');
+};
+$('#sound').onchange = e => { data.sound = e.target.checked; save(); };
+$('#reset').onclick = e => {
+  const r = e.target;
+  if (r.dataset.armed){
+    data = { ...DEF, daily: {}, best: {} };
+    save();
+    closeModal('settings');
+    show('home');
+  } else {
+    r.dataset.armed = '1';
+    r.textContent = 'Toca otra vez para confirmar';
+  }
+};
+$('#nextBtn').onclick = () => { closeModal('win'); startLevel(data.level); };
+$('#winHome').onclick = () => { closeModal('win'); show('home'); };
+$('#retry').onclick = () => { closeModal('over'); if (G.daily) startDaily(); else startLevel(G.level); };
+$('#overHome').onclick = () => { closeModal('over'); show('home'); };
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeModal(b.dataset.close));
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+show('home');
+</script>
+
+<!-- botón para volver al menú de apps (añadido) -->
+<a href="./#apps" id="vpHome" aria-label="Volver al menú de apps" style="position:fixed;left:12px;top:calc(14px + env(safe-area-inset-top));z-index:2147483647;width:42px;height:42px;border-radius:50%;background:#7b5a3cD9;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font:600 20px/1 system-ui,sans-serif;box-shadow:0 2px 10px #0006">⌂</a>
+</body>
+</html>

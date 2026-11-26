@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Flechas: laberintos de flechas</title>
+<style>
+:root{--bg:#f5ecdc;--ink:#3d2410;--accent:#c97a3e;--muted:#8a7560;--line:#e2d6c2}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;user-select:none;overflow:hidden}
+body{display:flex;flex-direction:column;max-width:520px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 12px 10px;border-bottom:2px solid var(--line)}
+.btn{background:none;border:none;color:var(--muted);width:44px;height:44px;border-radius:12px;cursor:pointer;display:grid;place-items:center;padding:0}
+.btn:active{background:var(--line)}
+.btn svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+h1{font-size:24px;color:var(--accent);margin:0;font-weight:700}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+.drops{display:flex;gap:10px}
+.drop{width:30px;height:38px;transition:opacity .3s,transform .3s}
+.drop.lost{opacity:.18;transform:scale(.8)}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:8px}
+#board{display:block;overflow:visible}
+.path{cursor:pointer;transition:transform .55s ease-in,opacity .55s}
+.path .main{fill:none;stroke:var(--ink);stroke-width:24;stroke-linecap:round;stroke-linejoin:round}
+.path .head{fill:var(--ink)}
+.path .hit{fill:none;stroke:transparent;stroke-width:90;stroke-linecap:round;stroke-linejoin:round}
+.path.gone{opacity:0;pointer-events:none}
+.path.bad{animation:shake .35s}
+.path.hint .main,.path.hint .head{stroke:var(--accent);fill:var(--accent);animation:pulse 1s infinite}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes pulse{50%{opacity:.45}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;opacity:0;transition:opacity .3s;pointer-events:none;font-size:15px;white-space:nowrap}
+.toast.show{opacity:1}
+.overlay{position:fixed;inset:0;background:rgba(61,36,16,.45);display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.show{display:flex}
+.card{background:var(--bg);border-radius:20px;padding:24px;text-align:center;max-width:320px;width:100%}
+.card h2{margin:0 0 8px;color:var(--accent)}
+.card p{margin:0 0 18px;color:var(--muted)}
+.primary{background:var(--accent);color:#fff;border:none;border-radius:14px;padding:14px 22px;font-size:17px;font-weight:600;cursor:pointer;width:100%}
+</style>
+</head>
+<body>
+<header>
+  <button class="btn" id="back" aria-label="Nivel anterior"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+  <h1 id="title">Nivel 1</h1>
+  <button class="btn" id="settings" aria-label="Reiniciar progreso"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z"/></svg></button>
+</header>
+<div class="bar">
+  <div class="drops" id="drops">
+    <svg class="drop" viewBox="0 0 24 30"><path d="M12 1C12 1 2 13 2 19a10 10 0 0 0 20 0C22 13 12 1 12 1z" fill="#4fa6ee"/></svg>
+    <svg class="drop" viewBox="0 0 24 30"><path d="M12 1C12 1 2 13 2 19a10 10 0 0 0 20 0C22 13 12 1 12 1z" fill="#4fa6ee"/></svg>
+    <svg class="drop" viewBox="0 0 24 30"><path d="M12 1C12 1 2 13 2 19a10 10 0 0 0 20 0C22 13 12 1 12 1z" fill="#4fa6ee"/></svg>
+  </div>
+  <button class="btn" id="hint" aria-label="Pista"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></button>
+</div>
+<main><svg id="board" xmlns="http://www.w3.org/2000/svg"></svg></main>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="loseOv">
+  <div class="card">
+    <h2>Sin gotas</h2>
+    <p>Has tocado demasiados caminos bloqueados. Inténtalo otra vez.</p>
+    <button class="primary" id="retry">Reintentar</button>
+  </div>
+</div>
+<div class="overlay" id="winOv">
+  <div class="card">
+    <h2>¡Nivel completado!</h2>
+    <p id="winText">Has sacado todos los caminos.</p>
+    <button class="primary" id="next">Siguiente nivel</button>
+  </div>
+</div>
+
+<script>
+const KEY='flechas_max_level';
+const CELL=100, NS='http://www.w3.org/2000/svg';
+// 0 arriba, 1 derecha, 2 abajo, 3 izquierda
+const DX=[0,1,0,-1], DY=[-1,0,1,0];
+
+// Figuras: cada una es una función (x,y) -> dentro/fuera, con y hacia arriba y rango aprox. [-1,1]
+const SHAPES=[
+  {name:'corazón', fn:(x,y)=>{const X=x*1.3,Y=y*1.3+0.1;return Math.pow(X*X+Y*Y-1,3)-X*X*Y*Y*Y<=0;}},
+  {name:'sonrisa', fn:(x,y)=>{
+      if(x*x+y*y>0.81) return false;
+      if((x+0.38)**2+(y-0.3)**2<0.017) return false;
+      if((x-0.38)**2+(y-0.3)**2<0.017) return false;
+      const d=Math.hypot(x,y-0.2);
+      return !(y<0.1&&d>0.38&&d<0.56);
+  }},
+  {name:'flor', fn:(x,y)=>{const th=Math.atan2(y,x), r=Math.hypot(x,y);return r<=0.3+0.65*Math.max(0,Math.cos(5*th));}},
+  {name:'pez', fn:(x,y)=>{
+      if((x+0.15)**2/0.49+y*y/0.16<=1) return !((x+0.45)**2+(y-0.1)**2<0.005);
+      return x>=0.5&&x<=0.95&&Math.abs(y)<=(x-0.5)*0.9;
+  }},
+  {name:'casa', fn:(x,y)=>{
+      if(Math.abs(x)<0.18&&y>-0.8&&y<-0.3) return false;
+      if(Math.abs(x)<=0.7&&y>=-0.8&&y<=0.1) return true;
+      return y>0.1&&y<=0.8&&Math.abs(x)<=(0.8-y)*0.9;
+  }},
+  {name:'gato', fn:(x,y)=>{
+      if((x+0.3)**2+(y-0.05)**2<0.008||(x-0.3)**2+(y-0.05)**2<0.008) return false;
+      if(x*x+(y+0.1)**2<=0.5625) return true;
+      return (x+0.5)**2+(y-0.65)**2<=0.078||(x-0.5)**2+(y-0.65)**2<=0.078;
+  }},
+  {name:'sol', fn:(x,y)=>{const th=Math.atan2(y,x), r=Math.hypot(x,y);return r<=0.55+0.35*Math.cos(8*th);}}
+];
+
+let level=1, R=0, C=0, occ=[], paths=[], lives=3, remaining=0, busy=false, shapeName='';
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function inB(r,c){return r>=0&&r<R&&c>=0&&c<C}
+
+// Un camino sale si la línea recta desde su punta hasta el borde no toca otra celda ocupada
+function rayClear(r,c,d){
+  let nr=r+DY[d], nc=c+DX[d];
+  while(inB(nr,nc)){
+    if(occ[nr][nc]!==-1) return false;
+    nr+=DY[d]; nc+=DX[d];
+  }
+  return true;
+}
+
+function shapeMask(fn,n){
+  const m=Array.from({length:n},()=>Array(n).fill(false));
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+    const x=((c+0.5)/n*2-1)*1.1;
+    const y=(1-(r+0.5)/n*2)*1.1;
+    m[r][c]=fn(x,y);
+  }
+  return m;
+}
+
+// Se generan añadiendo caminos dentro de la figura cuya punta tenga la salida libre;
+// quitarlos en orden inverso siempre se puede, así que cada nivel tiene solución.
+function makeLevel(l){
+  const rnd=mulberry32(l*104729+7);
+  const shape=SHAPES[(l-1)%SHAPES.length];
+  const n=Math.min(15,7+Math.floor((l-1)/2));
+  R=n; C=n;
+  shapeName=shape.name;
+  const mask=shapeMask(shape.fn,n);
+  occ=Array.from({length:R},()=>Array(C).fill(-1));
+  const maxLen=Math.min(10,3+Math.floor(l/3));
+  const list=[];
+  let tries=0;
+  while(tries<30000){
+    tries++;
+    const free=[];
+    for(let r=0;r<R;r++) for(let c=0;c<C;c++) if(mask[r][c]&&occ[r][c]===-1) free.push([r,c]);
+    if(!free.length) break;
+    const [r,c]=free[Math.floor(rnd()*free.length)];
+    const L=2+Math.floor(rnd()*(maxLen-1));
+    const id=list.length;
+    const cells=[[r,c]];
+    occ[r][c]=id;
+    while(cells.length<L){
+      const [cr,cc]=cells[cells.length-1];
+      const opts=[];
+      for(let d=0;d<4;d++){
+        const nr=cr+DY[d], nc=cc+DX[d];
+        if(inB(nr,nc)&&mask[nr][nc]&&occ[nr][nc]===-1) opts.push([nr,nc]);
+      }
+      if(!opts.length) break;
+      const [nr,nc]=opts[Math.floor(rnd()*opts.length)];
+      occ[nr][nc]=id; cells.push([nr,nc]);
+    }
+    const unmark=()=>cells.forEach(([a,b])=>occ[a][b]=-1);
+    if(cells.length<2){ unmark(); continue; }
+    const [hr,hc]=cells[cells.length-1], [pr,pc]=cells[cells.length-2];
+    const dir=[0,1,2,3].find(d=>DX[d]===hc-pc&&DY[d]===hr-pr);
+    if(!rayClear(hr,hc,dir)){ unmark(); continue; }
+    list.push({cells,dir,alive:true});
+  }
+  return list;
+}
+
+function ns(t){return document.createElementNS(NS,t)}
+function ctr(r,c){return [c*CELL+CELL/2, r*CELL+CELL/2]}
+
+function drawPath(p){
+  const g=ns('g');
+  g.setAttribute('class','path');
+  g.dataset.id=paths.indexOf(p);
+  const pts=p.cells.map(([r,c])=>ctr(r,c).join(',')).join(' ');
+  const hit=ns('polyline'); hit.setAttribute('class','hit'); hit.setAttribute('points',pts);
+  const main=ns('polyline'); main.setAttribute('class','main'); main.setAttribute('points',pts);
+  const [hr,hc]=p.cells[p.cells.length-1];
+  const [cx,cy]=ctr(hr,hc);
+  const head=ns('path'); head.setAttribute('class','head');
+  head.setAttribute('d',arrowD(cx,cy,p.dir));
+  g.append(hit,main,head);
+  return g;
+}
+
+function arrowD(cx,cy,d){
+  const dx=DX[d], dy=DY[d], px=-dy, py=dx, w=CELL*0.3;
+  const tx=cx+dx*CELL*0.46, ty=cy+dy*CELL*0.46;
+  const bx=cx+dx*CELL*0.02, by=cy+dy*CELL*0.02;
+  return `M${tx},${ty} L${bx+px*w},${by+py*w} L${bx-px*w},${by-py*w} Z`;
+}
+
+// La serpiente avanza por su propio camino: la cabeza sigue en línea recta hasta salir
+// y el cuerpo la sigue, de modo que el camino entero se desliza hacia fuera.
+function animateOut(p,gEl,onDone){
+  gEl.style.pointerEvents='none';
+  const main=gEl.querySelector('.main'), head=gEl.querySelector('.head');
+  gEl.querySelector('.hit').remove();
+  const N=p.cells.length;
+  const Q=p.cells.map(([r,c])=>ctr(r,c));
+  const [hx,hy]=Q[Q.length-1];
+  const dx=DX[p.dir], dy=DY[p.dir], E=CELL*(Math.max(R,C)+3);
+  Q.push([hx+dx*E, hy+dy*E]);
+  const cum=[0];
+  for(let i=1;i<Q.length;i++) cum.push(cum[i-1]+Math.hypot(Q[i][0]-Q[i-1][0],Q[i][1]-Q[i-1][1]));
+  const total=cum[cum.length-1];
+  const bodyLen=(N-1)*CELL;
+  const endH=total+bodyLen;
+  const speed=CELL*9;
+  const at=s=>{
+    if(s>=total){ const L=Q[Q.length-1]; return [L[0]+dx*(s-total), L[1]+dy*(s-total)]; }
+    let i=1; while(cum[i]<s) i++;
+    const f=(s-cum[i-1])/(cum[i]-cum[i-1]);
+    return [Q[i-1][0]+(Q[i][0]-Q[i-1][0])*f, Q[i-1][1]+(Q[i][1]-Q[i-1][1])*f];
+  };
+  const t0=performance.now();
+  const frame=now=>{
+    const h=Math.min(endH, bodyLen+(now-t0)/1000*speed);
+    const tailS=Math.max(0,h-bodyLen);
+    const pts=[at(tailS)];
+    for(let i=1;i<Q.length;i++) if(cum[i]>tailS&&cum[i]<h) pts.push(Q[i]);
+    pts.push(at(h));
+    main.setAttribute('points',pts.map(q=>q.join(',')).join(' '));
+    const [x,y]=at(h);
+    head.setAttribute('d',arrowD(x,y,p.dir));
+    if(h<endH) requestAnimationFrame(frame);
+    else { gEl.remove(); if(onDone) onDone(); }
+  };
+  requestAnimationFrame(frame);
+}
+
+function render(){
+  const svg=document.getElementById('board');
+  const size=Math.min(window.innerWidth-24, window.innerHeight-300, 480);
+  svg.setAttribute('viewBox',`0 0 ${C*CELL} ${R*CELL}`);
+  svg.setAttribute('width',size);
+  svg.setAttribute('height',size);
+  svg.innerHTML='';
+  for(const p of paths) if(p.alive) svg.appendChild(drawPath(p));
+}
+
+function updateDrops(){
+  document.querySelectorAll('.drop').forEach((d,i)=>d.classList.toggle('lost', i>=lives));
+}
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),1300);
+}
+
+function saveMax(l){
+  try{
+    const prev=parseInt(localStorage.getItem(KEY))||1;
+    if(l>prev) localStorage.setItem(KEY,String(l));
+  }catch(e){}
+}
+function loadMax(){
+  try{ return parseInt(localStorage.getItem(KEY))||1; }catch(e){ return 1; }
+}
+
+function load(l){
+  level=l;
+  paths=makeLevel(l);
+  lives=3;
+  remaining=paths.length;
+  busy=false;
+  document.getElementById('title').textContent='Nivel '+l;
+  updateDrops();
+  render();
+  saveMax(l);
+}
+
+document.getElementById('board').addEventListener('click',e=>{
+  const gEl=e.target.closest('.path');
+  if(!gEl||busy) return;
+  const p=paths[+gEl.dataset.id];
+  if(!p||!p.alive) return;
+  const [hr,hc]=p.cells[p.cells.length-1];
+  if(rayClear(hr,hc,p.dir)){
+    p.alive=false;
+    p.cells.forEach(([r,c])=>occ[r][c]=-1);
+    remaining--;
+    animateOut(p,gEl,()=>{
+      if(remaining===0){
+        busy=true;
+        document.getElementById('winText').textContent=`Has sacado todos los caminos y se ve: ${shapeName}.`;
+        document.getElementById('winOv').classList.add('show');
+      }
+    });
+  } else {
+    lives--;
+    updateDrops();
+    gEl.classList.remove('bad'); void gEl.getBoundingClientRect(); gEl.classList.add('bad');
+    toast('Ese camino está bloqueado');
+    if(lives<=0){
+      busy=true;
+      setTimeout(()=>document.getElementById('loseOv').classList.add('show'),700);
+    }
+  }
+});
+
+document.getElementById('hint').addEventListener('click',()=>{
+  if(busy) return;
+  document.querySelectorAll('.path.hint').forEach(x=>x.classList.remove('hint'));
+  for(const gEl of document.querySelectorAll('.path')){
+    const p=paths[+gEl.dataset.id];
+    if(!p||!p.alive) continue;
+    const [hr,hc]=p.cells[p.cells.length-1];
+    if(rayClear(hr,hc,p.dir)){
+      gEl.classList.add('hint');
+      setTimeout(()=>gEl.classList.remove('hint'),2000);
+      return;
+    }
+  }
+});
+
+document.getElementById('retry').addEventListener('click',()=>{
+  document.getElementById('loseOv').classList.remove('show');
+  load(level);
+});
+document.getElementById('next').addEventListener('click',()=>{
+  document.getElementById('winOv').classList.remove('show');
+  load(level+1);
+});
+document.getElementById('back').addEventListener('click',()=>{
+  if(level>1) load(level-1);
+});
+document.getElementById('settings').addEventListener('click',()=>{
+  if(!confirm('¿Reiniciar el progreso desde el nivel 1?')) return;
+  try{ localStorage.setItem(KEY,'1'); }catch(e){}
+  load(1);
+});
+
+let resizeT;
+window.addEventListener('resize',()=>{ clearTimeout(resizeT); resizeT=setTimeout(render,150); });
+
+load(loadMax());
+</script>
+
+<!-- botón para volver al menú de apps (añadido) -->
+<a href="./#apps" id="vpHome" aria-label="Volver al menú de apps" style="position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:2147483647;width:42px;height:42px;border-radius:50%;background:#7b5a3cD9;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font:600 20px/1 system-ui,sans-serif;box-shadow:0 2px 10px #0006">⌂</a>
+</body>
+</html>
