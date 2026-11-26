@@ -164,6 +164,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .btn.ghost{background:var(--soft);color:var(--ink)}
 .btn.danger{background:transparent;color:var(--danger);border:1px solid var(--line)}
 .hint{font-size:12px;color:var(--muted);line-height:1.45;margin-top:7px}
+a.opt{color:var(--ink);text-decoration:none}
 .opt{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 10px;border-radius:12px;font-size:15px;text-align:left}
 .opt.on{background:var(--lime);font-weight:700}
 .dlbox{margin-top:10px;padding:12px;border-radius:12px;background:var(--soft);font-size:13px;line-height:1.4}
@@ -191,7 +192,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   <div class="lib-scroll">
     <div class="lib-top">
       <div class="brand"><div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16M8 7h8M8 11h8"/></svg></div>Voz y Página</div>
-      <button class="round" id="libSettings" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <div style="display:flex;gap:8px"><button class="round" id="openApps" aria-label="Mis apps"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/></svg></button>
+      <button class="round" id="libSettings" aria-label="Ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
     </div>
     <h1>Escucha donde<br>lo dejaste.</h1>
     <p class="lead">Tus libros en voz alta, con la posición guardada.</p>
@@ -256,6 +258,16 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   <div class="sheet-body" id="timerList"></div>
 </div>
 
+<div class="sheet" id="appsSheet">
+  <div class="sheet-h"><h3>Mis apps</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+  <div class="sheet-body">
+    <button class="opt on" data-close>📚 Voz y Página <span class="subtle">estás aquí</span></button>
+    <a class="opt" href="sonido.html">🌙 Sonido para dormir y concentrarse</a>
+    <a class="opt" href="uned1.html">🎓 UNED · primer trimestre</a>
+    <a class="opt" href="uned2.html">🎓 UNED · segundo trimestre</a>
+    <div class="hint" style="margin-top:10px">En cada app tienes abajo a la izquierda el botón ⌂ para volver a este menú.</div>
+  </div>
+</div>
 <div class="sheet" id="bookSheet">
   <div class="sheet-h"><h3 id="bookSheetTitle">Libro</h3><button class="close" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
   <div class="sheet-body">
@@ -1923,6 +1935,8 @@ $('clearCache').onclick = async () => { await db.clear('prepared'); preparedKeys
 function openSettings() { refreshSettingsUI(); refreshCacheInfo(); openSheet('settingsSheet'); }
 $('openSettings').onclick = openSettings;
 $('libSettings').onclick = openSettings;
+$('openApps').onclick = () => openSheet('appsSheet');
+if (location.hash === '#apps') { history.replaceState(null, '', location.pathname); setTimeout(() => openSheet('appsSheet'), 300); }
 
 /* ================= PANTALLA DE BLOQUEO / AURICULARES ================= */
 let iconUrl = '';
