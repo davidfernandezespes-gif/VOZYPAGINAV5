@@ -465,7 +465,7 @@ function laneDir(p,i){
   const dx=b[0]-a[0], dy=b[1]-a[1], n=Math.hypot(dx,dy)||1;
   return [dx/n, dy/n];
 }
-// fichas que comparten casilla: si son dos, una detrás de otra en el sentido del pasillo
+// fichas que comparten casilla: si son dos, una junto a otra a lo ancho del pasillo
 function pieceSlot(p,i){
   const [gx,gy]=pieceXY(p,i);
   const list=[];
@@ -477,7 +477,8 @@ function pieceSlot(p,i){
   const idx=list.findIndex(([q,j])=>q===p&&j===i);
   // los desplazamientos se piensan en pantalla y se pasan al tablero girado
   const th=viewM()*Math.PI/2;
-  if(list.length===2){ const [dx,dy]=laneDir(p,i); const o=idx?0.34:-0.34; return [o*dx, o*dy, 0.5]; }
+  // dos fichas en la misma casilla: una al lado de la otra, atravesando el pasillo (en un pasillo horizontal quedan una encima de otra; en uno vertical, lado a lado)
+  if(list.length===2){ const [dx,dy]=laneDir(p,i); const o=idx?0.25:-0.25; return [-dy*o, dx*o, 0.66]; }
   const off=[[-.22,-.22],[.22,-.22],[-.22,.22],[.22,.22]][idx]||[0,0];
   return [off[0]*Math.cos(th)-off[1]*Math.sin(th), off[0]*Math.sin(th)+off[1]*Math.cos(th), 0.5];
 }
